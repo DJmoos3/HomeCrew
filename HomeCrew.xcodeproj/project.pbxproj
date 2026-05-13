@@ -7,6 +7,8 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		032AD5D12FB473C60077D60B /* FirebaseAuth in Frameworks */ = {isa = PBXBuildFile; productRef = 032AD5D02FB473C60077D60B /* FirebaseAuth */; };
+		032AD5D32FB473C60077D60B /* FirebaseFirestore in Frameworks */ = {isa = PBXBuildFile; productRef = 032AD5D22FB473C60077D60B /* FirebaseFirestore */; };
 		6ABDD58C2FB470A30037B80F /* .gitignore in Resources */ = {isa = PBXBuildFile; fileRef = 6ABDD58A2FB470990037B80F /* .gitignore */; };
 /* End PBXBuildFile section */
 
@@ -28,6 +30,8 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				032AD5D12FB473C60077D60B /* FirebaseAuth in Frameworks */,
+				032AD5D32FB473C60077D60B /* FirebaseFirestore in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -71,6 +75,8 @@
 			);
 			name = HomeCrew;
 			packageProductDependencies = (
+				032AD5D02FB473C60077D60B /* FirebaseAuth */,
+				032AD5D22FB473C60077D60B /* FirebaseFirestore */,
 			);
 			productName = HomeCrew;
 			productReference = 6ABDD57C2FB470890037B80F /* HomeCrew.app */;
@@ -84,7 +90,7 @@
 			attributes = {
 				BuildIndependentTargetsInParallel = 1;
 				LastSwiftUpdateCheck = 2630;
-				LastUpgradeCheck = 2630;
+				LastUpgradeCheck = 2650;
 				TargetAttributes = {
 					6ABDD57B2FB470890037B80F = {
 						CreatedOnToolsVersion = 26.3;
@@ -100,6 +106,9 @@
 			);
 			mainGroup = 6ABDD5732FB470890037B80F;
 			minimizedProjectReferenceProxies = 1;
+			packageReferences = (
+				032AD5CF2FB473C60077D60B /* XCRemoteSwiftPackageReference "firebase-ios-sdk" */,
+			);
 			preferredProjectObjectVersion = 77;
 			productRefGroup = 6ABDD57D2FB470890037B80F /* Products */;
 			projectDirPath = "";
@@ -191,6 +200,7 @@
 				MTL_FAST_MATH = YES;
 				ONLY_ACTIVE_ARCH = YES;
 				SDKROOT = iphoneos;
+				STRING_CATALOG_GENERATE_SYMBOLS = YES;
 				SWIFT_ACTIVE_COMPILATION_CONDITIONS = "DEBUG $(inherited)";
 				SWIFT_OPTIMIZATION_LEVEL = "-Onone";
 			};
@@ -248,6 +258,7 @@
 				MTL_ENABLE_DEBUG_INFO = NO;
 				MTL_FAST_MATH = YES;
 				SDKROOT = iphoneos;
+				STRING_CATALOG_GENERATE_SYMBOLS = YES;
 				SWIFT_COMPILATION_MODE = wholemodule;
 				VALIDATE_PRODUCT = YES;
 			};
@@ -260,7 +271,7 @@
 				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
 				CODE_SIGN_STYLE = Automatic;
 				CURRENT_PROJECT_VERSION = 1;
-				DEVELOPMENT_TEAM = 2J3P65Y3NA;
+				DEVELOPMENT_TEAM = "";
 				ENABLE_PREVIEWS = YES;
 				GENERATE_INFOPLIST_FILE = YES;
 				INFOPLIST_KEY_UIApplicationSceneManifest_Generation = YES;
@@ -292,7 +303,7 @@
 				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
 				CODE_SIGN_STYLE = Automatic;
 				CURRENT_PROJECT_VERSION = 1;
-				DEVELOPMENT_TEAM = 2J3P65Y3NA;
+				DEVELOPMENT_TEAM = "";
 				ENABLE_PREVIEWS = YES;
 				GENERATE_INFOPLIST_FILE = YES;
 				INFOPLIST_KEY_UIApplicationSceneManifest_Generation = YES;
@@ -339,6 +350,30 @@
 			defaultConfigurationName = Release;
 		};
 /* End XCConfigurationList section */
+
+/* Begin XCRemoteSwiftPackageReference section */
+		032AD5CF2FB473C60077D60B /* XCRemoteSwiftPackageReference "firebase-ios-sdk" */ = {
+			isa = XCRemoteSwiftPackageReference;
+			repositoryURL = "https://github.com/firebase/firebase-ios-sdk";
+			requirement = {
+				kind = upToNextMajorVersion;
+				minimumVersion = 12.13.0;
+			};
+		};
+/* End XCRemoteSwiftPackageReference section */
+
+/* Begin XCSwiftPackageProductDependency section */
+		032AD5D02FB473C60077D60B /* FirebaseAuth */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = 032AD5CF2FB473C60077D60B /* XCRemoteSwiftPackageReference "firebase-ios-sdk" */;
+			productName = FirebaseAuth;
+		};
+		032AD5D22FB473C60077D60B /* FirebaseFirestore */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = 032AD5CF2FB473C60077D60B /* XCRemoteSwiftPackageReference "firebase-ios-sdk" */;
+			productName = FirebaseFirestore;
+		};
+/* End XCSwiftPackageProductDependency section */
 	};
 	rootObject = 6ABDD5742FB470890037B80F /* Project object */;
 }
