@@ -28,7 +28,11 @@ struct HomeCrewApp: App {
     
     var body: some Scene {
         WindowGroup {
-            ContentView()
+            NavigationStack {
+                ContentView()
+            }
+            .environmentObject(authViewModel)
+            
 //            NavigationStack{
 //                LoginView()
 //                    .environmentObject(authViewModel)
