@@ -28,10 +28,11 @@ struct HomeCrewApp: App {
     
     var body: some Scene {
         WindowGroup {
-            NavigationStack{
-                LoginView()
-                    .environmentObject(authViewModel)
-            }
+            ContentView()
+//            NavigationStack{
+//                LoginView()
+//                    .environmentObject(authViewModel)
+//            }
         }
     }
 }
