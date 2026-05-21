@@ -7,15 +7,17 @@
 
 import Foundation
 import SwiftUI
-import Combine
+import Observation
 
-class ProfileViewModel: ObservableObject {
+@Observable
+
+class ProfileViewModel {
     
-    @Published var username: String = ""
-    @Published var fullName: String = ""
-    @Published var email: String = ""
+    var username: String = ""
+    var fullName: String = ""
+    var email: String = ""
     
-    @Published var members: [Member] = []
+    var members: [Member] = []
     
     func addTestMember() {
         members.append(Member(name: "New Member", role: "Member"))
