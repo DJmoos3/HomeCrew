@@ -6,11 +6,6 @@
 //
 
 import SwiftUI
-struct Member: Identifiable {
-    let id = UUID()
-    let name: String
-    let role: String
-}
 
 //Member Row
 
@@ -47,13 +42,8 @@ struct MemberRow: View {
 
 struct ProfileView: View {
     
-    //User Data
-       @State private var username: String = ""
-       @State private var fullName: String = ""
-       @State private var email: String = ""
-    
-    //Members
-    @State private var members: [Member] = []
+    //ViewModel
+    @StateObject private var viewModel = ProfileViewModel()
     
     var body: some View {
         
@@ -65,7 +55,7 @@ struct ProfileView: View {
                 HStack {
                     
                     Button("Edit") {
-
+                        
                     }
                     
                     Spacer()
@@ -82,12 +72,12 @@ struct ProfileView: View {
                     
                     VStack(alignment: .leading, spacing: 24) {
                         
-                        // Title
+                        //Title
                         Text("Profile")
                             .font(.largeTitle)
                             .fontWeight(.bold)
                         
-                        //Profile Sec
+                        //Profile Section
                         HStack(alignment: .center, spacing: 20) {
                             
                             ZStack(alignment: .bottomTrailing) {
@@ -111,15 +101,27 @@ struct ProfileView: View {
                             
                             VStack(alignment: .leading, spacing: 5) {
                                 
-                                Text(username.isEmpty ? "No username" : username)
-                                    .font(.headline)
+                                Text(
+                                    viewModel.username.isEmpty
+                                    ? "No username"
+                                    : viewModel.username
+                                )
+                                .font(.headline)
                                 
-                                Text(fullName.isEmpty ? "No name set" : fullName)
-                                    .foregroundColor(.gray)
+                                Text(
+                                    viewModel.fullName.isEmpty
+                                    ? "No name set"
+                                    : viewModel.fullName
+                                )
+                                .foregroundColor(.gray)
                                 
-                                Text(email.isEmpty ? "No email set" : email)
-                                    .font(.subheadline)
-                                    .foregroundColor(.gray)
+                                Text(
+                                    viewModel.email.isEmpty
+                                    ? "No email set"
+                                    : viewModel.email
+                                )
+                                .font(.subheadline)
+                                .foregroundColor(.gray)
                             }
                             
                             Spacer()
@@ -147,29 +149,32 @@ struct ProfileView: View {
                             }
                         }
                         
-                        //Members Section
+                        //Member Section
                         VStack(alignment: .leading, spacing: 12) {
                             
                             Text("Members")
                                 .font(.headline)
                             
-                            //Empty state handling
-                            if members.isEmpty {
+                            // Empty State
+                            if viewModel.members.isEmpty {
+                                
                                 Text("No members yet. Invite someone!")
                                     .foregroundColor(.gray)
                                     .padding()
                                     .frame(maxWidth: .infinity, alignment: .leading)
                                     .background(Color(.systemGray6))
                                     .cornerRadius(12)
+                                
                             } else {
-                                ForEach(members) { member in
+                                
+                                ForEach(viewModel.members) { member in
                                     MemberRow(member: member)
                                 }
                             }
                             
+                            // Invite Button
                             Button(action: {
-                                //TEMP TEST (remove later when backend added)
-                                members.append(Member(name: "New Member", role: "Member"))
+                                viewModel.addTestMember()
                             }) {
                                 Text("Invite Members")
                                     .fontWeight(.semibold)
