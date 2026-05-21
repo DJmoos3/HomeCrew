@@ -19,7 +19,7 @@ struct ChatRoomView: View {
 
     @State private var messageText = ""
 
-    let messages = [
+    @State var messages = [
         Message(text: "Hej!", isMe: true),
         Message(text: "Glöm inte att städa ditt rum", isMe: true),
         Message(text: "Okej", isMe: false),
@@ -40,9 +40,11 @@ struct ChatRoomView: View {
             Divider()
 
             HStack {
-                TextField("Skriv ett meddelande...", text: $messageText)
+                TextField("Skriv ett meddelande...", text: $messageText, axis: .vertical)
+                    .lineLimit(1...5)
                     .textFieldStyle(.roundedBorder)
                 Button {
+                    messages.append(Message(text: messageText, isMe: true))
                     messageText = ""
                 } label: {
                     Image(systemName: "paperplane.fill")
@@ -65,6 +67,8 @@ struct MessageCell: View {
         HStack {
             if message.isMe {
                 Spacer()
+            } else {
+                Circle().frame(width: 25, height: 25)
             }
             Text(message.text)
                 .padding(12)
@@ -75,6 +79,7 @@ struct MessageCell: View {
                     maxWidth: 260,
                     alignment: message.isMe ? .trailing : .leading
                 )
+            
 
             if !message.isMe {
                 Spacer()
