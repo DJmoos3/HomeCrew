@@ -43,7 +43,7 @@ struct MemberRow: View {
 struct ProfileView: View {
     
     //ViewModel
-    @StateObject private var viewModel = ProfileViewModel()
+    @State private var viewModel = ProfileViewModel()
     
     var body: some View {
         
