@@ -54,9 +54,15 @@ struct ProfileView: View {
                 //Top Bar
                 HStack {
                     
-                    Button("Edit") {
-                        
-                    }
+                    NavigationLink {
+
+                    EditProfileView()
+
+                 } label: {
+
+                   Text("Edit")
+
+                }
                     
                     Spacer()
                     
