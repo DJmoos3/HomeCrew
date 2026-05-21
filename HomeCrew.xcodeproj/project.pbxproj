@@ -9,10 +9,12 @@
 /* Begin PBXBuildFile section */
 		032AD5D12FB473C60077D60B /* FirebaseAuth in Frameworks */ = {isa = PBXBuildFile; productRef = 032AD5D02FB473C60077D60B /* FirebaseAuth */; };
 		032AD5D32FB473C60077D60B /* FirebaseFirestore in Frameworks */ = {isa = PBXBuildFile; productRef = 032AD5D22FB473C60077D60B /* FirebaseFirestore */; };
+		32F729232FBF11DD003ED39A /* GoogleService-Info.plist in Resources */ = {isa = PBXBuildFile; fileRef = 32F729222FBF11DD003ED39A /* GoogleService-Info.plist */; };
 		6ABDD58C2FB470A30037B80F /* .gitignore in Resources */ = {isa = PBXBuildFile; fileRef = 6ABDD58A2FB470990037B80F /* .gitignore */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
+		32F729222FBF11DD003ED39A /* GoogleService-Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = "GoogleService-Info.plist"; sourceTree = "<group>"; };
 		6ABDD57C2FB470890037B80F /* HomeCrew.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = HomeCrew.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		6ABDD58A2FB470990037B80F /* .gitignore */ = {isa = PBXFileReference; lastKnownFileType = text; path = .gitignore; sourceTree = "<group>"; };
 /* End PBXFileReference section */
@@ -44,6 +46,7 @@
 				6ABDD58A2FB470990037B80F /* .gitignore */,
 				6ABDD57E2FB470890037B80F /* HomeCrew */,
 				6ABDD57D2FB470890037B80F /* Products */,
+				32F729222FBF11DD003ED39A /* GoogleService-Info.plist */,
 			);
 			sourceTree = "<group>";
 		};
@@ -125,6 +128,7 @@
 			buildActionMask = 2147483647;
 			files = (
 				6ABDD58C2FB470A30037B80F /* .gitignore in Resources */,
+				32F729232FBF11DD003ED39A /* GoogleService-Info.plist in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
