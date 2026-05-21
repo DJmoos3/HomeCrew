@@ -22,6 +22,7 @@ struct RegisterView: View {
                 .padding()
                 .background(Color.gray.opacity(0.2))
                 .cornerRadius(10)
+            Text("minimum 6 letters")
             Button{
                 viewModel.signUp()
             }label: {
@@ -33,6 +34,13 @@ struct RegisterView: View {
                     .background(Color.blue)
                     .cornerRadius(10)
             }
+            .navigationDestination(isPresented: $viewModel.isSignedIn) {
+                ContentView()
+                    .environmentObject(viewModel)
+            }
+        }
+        .onAppear {
+            viewModel.clearFields()
         }
     }
 }
