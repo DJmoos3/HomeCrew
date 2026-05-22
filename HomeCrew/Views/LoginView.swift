@@ -13,7 +13,6 @@ struct LoginView: View {
     
     var body: some View {
         VStack{
-            
             TextField("Email...", text: $viewModel.email)
                 .padding()
                 .background(Color.gray.opacity(0.2))
@@ -25,7 +24,7 @@ struct LoginView: View {
                 .cornerRadius(10)
             HStack{
                 Button{
-                    
+                    viewModel.signIn()
                 }label: {
                     Text("Sign In")
                         .font(.headline)
@@ -35,7 +34,19 @@ struct LoginView: View {
                         .background(Color.blue)
                         .cornerRadius(30)
                 }
+                .navigationDestination(isPresented: $viewModel.isSignedIn) {
+                    ContentView()
+                        .environmentObject(viewModel)
+                }
                 .padding(.horizontal, 5)
+                .alert("Error", isPresented: Binding(
+                    get: { viewModel.errorMessage != nil },
+                    set: { if !$0 { viewModel.errorMessage = nil } }
+                )) {
+                    Button("OK", role: .cancel) { }
+                } message: {
+                    Text(viewModel.errorMessage ?? "")
+                }
                 
                 NavigationLink{
                     RegisterView()
@@ -53,6 +64,9 @@ struct LoginView: View {
             }
         }
         .navigationTitle("Sign In")
+        .onAppear {
+            viewModel.clearFields()
+        }
     }
 }
 
