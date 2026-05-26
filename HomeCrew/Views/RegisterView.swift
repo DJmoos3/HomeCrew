@@ -19,14 +19,19 @@ struct RegisterView: View {
                 .padding()
                 .background(Color.gray.opacity(0.2))
                 .cornerRadius(10)
-            
+            TextField("Username...", text: $viewModel.username)
+                .padding()
+                .background(Color.gray.opacity(0.2))
+                .cornerRadius(10)
             SecureField("Pasword...", text: $viewModel.password)
                 .padding()
                 .background(Color.gray.opacity(0.2))
                 .cornerRadius(10)
             Text("minimum 6 letters")
             Button{
-                viewModel.signUp()
+                Task {
+                    await viewModel.signUp()
+                }
             }label: {
                 Text("Register")
                     .font(.headline)

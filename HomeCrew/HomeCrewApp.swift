@@ -22,12 +22,12 @@ class AppDelegate: NSObject, UIApplicationDelegate {
 
 @main
 struct HomeCrewApp: App {
-
-    @State private var authViewModel = AuthViewModel()
-
     // register app delegate for Firebase setup
     @UIApplicationDelegateAdaptor(AppDelegate.self) var delegate
 
+    @State private var authViewModel = AuthViewModel()
+
+    
     var body: some Scene {
         WindowGroup {
             //            NavigationStack {
