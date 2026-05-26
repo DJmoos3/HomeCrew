@@ -40,7 +40,7 @@ final class AuthViewModel {
         }
 
         do {
-            let returnedUserData = try await AuthManager.shared.createUser(
+            let returnedUserData = try await AuthRepository.shared.createUser(
                 email: email,
                 password: password
             )
@@ -64,7 +64,7 @@ final class AuthViewModel {
         errorMessage = nil
         Task {
             do {
-                try await AuthManager.shared.signIn(
+                try await AuthRepository.shared.signIn(
                     email: email,
                     password: password
                 )
