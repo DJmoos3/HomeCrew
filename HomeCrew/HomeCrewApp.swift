@@ -23,7 +23,7 @@ class AppDelegate: NSObject, UIApplicationDelegate {
 @main
 struct HomeCrewApp: App {
 
-    @StateObject private var authViewModel = AuthViewModel()
+    @State private var authViewModel = AuthViewModel()
 
     // register app delegate for Firebase setup
     @UIApplicationDelegateAdaptor(AppDelegate.self) var delegate
@@ -37,7 +37,7 @@ struct HomeCrewApp: App {
 
             NavigationStack {
                 LoginView()
-                    .environmentObject(authViewModel)
+                    .environment(authViewModel)
             }
         }
     }

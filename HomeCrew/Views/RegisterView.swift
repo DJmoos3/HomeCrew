@@ -9,9 +9,11 @@ import SwiftUI
 
 struct RegisterView: View {
     
-    @EnvironmentObject var viewModel: AuthViewModel
+    @Environment(AuthViewModel.self) private var viewModel
     
     var body: some View {
+        @Bindable var viewModel = viewModel
+        
         VStack{
             TextField("Email...", text: $viewModel.email)
                 .padding()
@@ -36,7 +38,7 @@ struct RegisterView: View {
             }
             .navigationDestination(isPresented: $viewModel.isSignedIn) {
                 ContentView()
-                    .environmentObject(viewModel)
+                    .environment(viewModel)
             }
         }
         .onAppear {
@@ -48,6 +50,6 @@ struct RegisterView: View {
 #Preview {
     NavigationStack{
         RegisterView()
-            .environmentObject(AuthViewModel())
+            .environment(AuthViewModel())
     }
 }

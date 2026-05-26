@@ -9,9 +9,11 @@ import SwiftUI
 
 struct LoginView: View {
     
-    @EnvironmentObject var viewModel: AuthViewModel
+    @Environment(AuthViewModel.self) private var viewModel
     
     var body: some View {
+        @Bindable var viewModel = viewModel
+        
         VStack{
             TextField("Email...", text: $viewModel.email)
                 .padding()
@@ -36,7 +38,7 @@ struct LoginView: View {
                 }
                 .navigationDestination(isPresented: $viewModel.isSignedIn) {
                     ContentView()
-                        .environmentObject(viewModel)
+                        .environment(viewModel)
                 }
                 .padding(.horizontal, 5)
                 .alert("Error", isPresented: Binding(
@@ -50,7 +52,7 @@ struct LoginView: View {
                 
                 NavigationLink{
                     RegisterView()
-                        .environmentObject(viewModel)
+                        .environment(viewModel)
                 } label: {
                     Text("Sign Up")
                         .font(.headline)
@@ -73,6 +75,6 @@ struct LoginView: View {
 #Preview {
     NavigationStack{
         LoginView()
-            .environmentObject(AuthViewModel())
+            .environment(AuthViewModel())
     }
 }

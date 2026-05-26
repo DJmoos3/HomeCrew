@@ -6,15 +6,17 @@
 //
 
 import Foundation
-import Combine
+import Observation
 import FirebaseAuth
 
-final class AuthViewModel : ObservableObject    {
-    @Published var email = ""
-    @Published var password = ""
+@Observable
+@MainActor
+final class AuthViewModel    {
+    var email = ""
+    var password = ""
     
-    @Published var errorMessage: String? = nil
-    @Published var isSignedIn: Bool = false
+    var errorMessage: String? = nil
+    var isSignedIn: Bool = false
     
     
     func clearFields() {
