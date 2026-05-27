@@ -8,6 +8,7 @@
 import FirebaseAuth
 import Foundation
 import Observation
+import FirebaseFirestore
 
 @Observable
 @MainActor
@@ -15,6 +16,7 @@ final class AuthViewModel {
     var email = ""
     var username = ""
     var password = ""
+    var currentUser: AppUser? = nil
 
     var errorMessage: String? = nil
     var isSignedIn: Bool = false
@@ -49,6 +51,7 @@ final class AuthViewModel {
 
             isSignedIn = true
             password = ""
+            fetchCurrentUser()
             print("Success")
             print(returnedUserData)
         } catch {
@@ -69,6 +72,7 @@ final class AuthViewModel {
                     password: password
                 )
                 isSignedIn = true
+                fetchCurrentUser()
             } catch let error as NSError {
                 let authError = AuthErrorCode(rawValue: error.code)
                 isSignedIn = false
@@ -86,6 +90,18 @@ final class AuthViewModel {
                 default:
                     errorMessage = error.localizedDescription
                 }
+            }
+        }
+    }
+    func fetchCurrentUser() {
+        guard let uid = Auth.auth().currentUser?.uid else { return }
+        
+        Task {
+            do {
+                let snapshot = try await Firestore.firestore().collection("users").document(uid).getDocument()
+                currentUser = try snapshot.data(as: AppUser.self)
+            } catch {
+                print("Error fetching user: \(error)")
             }
         }
     }

@@ -8,6 +8,7 @@
 import SwiftUI
 
 struct TodoView: View {
+    @Environment(AuthViewModel.self) var authViewModel
     
     @State private var showingSheet: Bool = false
     
@@ -43,7 +44,7 @@ struct TodoView: View {
                         )
                     )
                     .font(.callout)
-                    Text("Hello, User")
+                    Text("Hello, \(authViewModel.currentUser?.username ?? "User")")
                         .font(.largeTitle.bold())
                     Text("You have **4 tasks** left today")
                         .font(.subheadline)
