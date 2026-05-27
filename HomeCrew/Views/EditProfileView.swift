@@ -133,19 +133,6 @@ struct EditProfileView: View {
             .navigationTitle("Edit Profile")
             .navigationBarTitleDisplayMode(.inline)
             .toolbar {
-                ToolbarItem(placement: .topBarLeading) {
-                    Button {
-                        // Dummy close action
-                    } label: {
-                        Image(systemName: "xmark")
-                            .font(.headline)
-                            .foregroundStyle(HomeCrewTheme.darkBlue)
-                            .padding(10)
-                            .background(HomeCrewTheme.cardBackground)
-                            .clipShape(Circle())
-                    }
-                }
-                
                 ToolbarItem(placement: .topBarTrailing) {
                     Button("Save") {
                         // Dummy save action
