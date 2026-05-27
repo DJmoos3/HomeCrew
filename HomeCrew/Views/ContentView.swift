@@ -9,22 +9,23 @@ import SwiftUI
 import Firebase
 
 struct ContentView: View {
-
+    
     
     var body: some View {
         TabView {
-            TodoView()
-                .tabItem {
-                    Label("Todo", systemImage: "list.bullet")
-                }
-            ChatView()
-                .tabItem {
-                    Label("Chat", systemImage: "bubble.right")
-                }
-            ProfileView()
-                .tabItem {
-                    Label("Profile", systemImage: "person.crop.circle")
-                }
+            
+            Tab("Todo", systemImage: "list.bullet") {
+                TodoView()
+            }
+            
+            Tab("Chat", systemImage: "bubble.right") {
+                ChatView()
+            }
+            
+            Tab("Profile", systemImage: "person.crop.circle") {
+                ProfileView()
+            }
+            
         }
     }
 }
