@@ -43,7 +43,8 @@ struct MemberRow: View {
 struct ProfileView: View {
     
     //ViewModel
-    @State private var viewModel = ProfileViewModel()
+    @State private var profileViewModel = ProfileViewModel()
+    @Environment(AuthViewModel.self) private var authViewModel
     
     var body: some View {
         
@@ -107,27 +108,19 @@ struct ProfileView: View {
                             
                             VStack(alignment: .leading, spacing: 5) {
                                 
-                                Text(
-                                    viewModel.username.isEmpty
-                                    ? "No username"
-                                    : viewModel.username
-                                )
+                                Text(authViewModel.currentUser?.username ?? "No username")
                                 .font(.headline)
                                 
                                 Text(
-                                    viewModel.fullName.isEmpty
+                                    profileViewModel.fullName.isEmpty
                                     ? "No name set"
-                                    : viewModel.fullName
+                                    : profileViewModel.fullName
                                 )
                                 .foregroundColor(.gray)
                                 
-                                Text(
-                                    viewModel.email.isEmpty
-                                    ? "No email set"
-                                    : viewModel.email
-                                )
-                                .font(.subheadline)
-                                .foregroundColor(.gray)
+                                Text(authViewModel.currentUser?.email ?? "No email set")
+                                    .font(.subheadline)
+                                    .foregroundColor(.gray)
                             }
                             
                             Spacer()
@@ -162,7 +155,7 @@ struct ProfileView: View {
                                 .font(.headline)
                             
                             // Empty State
-                            if viewModel.members.isEmpty {
+                            if profileViewModel.members.isEmpty {
                                 
                                 Text("No members yet. Invite someone!")
                                     .foregroundColor(.gray)
@@ -173,14 +166,14 @@ struct ProfileView: View {
                                 
                             } else {
                                 
-                                ForEach(viewModel.members) { member in
+                                ForEach(profileViewModel.members) { member in
                                     MemberRow(member: member)
                                 }
                             }
                             
                             // Invite Button
                             Button(action: {
-                                viewModel.addTestMember()
+                                profileViewModel.addTestMember()
                             }) {
                                 Text("Invite Members")
                                     .fontWeight(.semibold)

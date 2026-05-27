@@ -51,7 +51,7 @@ final class AuthViewModel {
 
             isSignedIn = true
             password = ""
-            fetchCurrentUser()
+            await fetchCurrentUser()
             print("Success")
             print(returnedUserData)
         } catch {
@@ -72,7 +72,7 @@ final class AuthViewModel {
                     password: password
                 )
                 isSignedIn = true
-                fetchCurrentUser()
+                await fetchCurrentUser()
             } catch let error as NSError {
                 let authError = AuthErrorCode(rawValue: error.code)
                 isSignedIn = false
@@ -93,7 +93,7 @@ final class AuthViewModel {
             }
         }
     }
-    func fetchCurrentUser() {
+    func fetchCurrentUser() async{
         guard let uid = Auth.auth().currentUser?.uid else { return }
         
         Task {

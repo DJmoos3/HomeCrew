@@ -8,7 +8,7 @@
 import SwiftUI
 
 struct TodoView: View {
-    @Environment(AuthViewModel.self) var authViewModel
+    @Environment(AuthViewModel.self) private var authViewModel
     
     @State private var showingSheet: Bool = false
     
@@ -117,6 +117,11 @@ struct TodoView: View {
             }
             
         } //Main VStack end
+        .onAppear {
+            Task {
+                await authViewModel.fetchCurrentUser()
+            }
+        }
         .padding()
         .overlay(alignment: .bottomTrailing) {
             Button {
