@@ -7,161 +7,124 @@
 
 import SwiftUI
 
-
 struct EditProfileView: View {
     
-    // Dummy data فقط للتصميم
+    // Dummy data for design only
     @State private var fullName = "Anders Anderson"
     @State private var householdName = "The Andersons"
-    @State private var taskReminder = true
-    @State private var darkMode = false
+    @AppStorage("darkModeEnabled") private var darkMode = false
+    @AppStorage("taskReminderEnabled") private var taskReminder = true
     
     var body: some View {
-        NavigationStack {
-            ScrollView {
-                VStack(spacing: 24) {
-                    
-                    // HomeCrew style profile icon
-                    VStack(spacing: 10) {
-                        ZStack {
-                            Circle()
-                                .fill(HomeCrewTheme.primaryPurple.opacity(0.12))
-                                .frame(width: 120, height: 120)
-                            
-                            Image(systemName: "person.2.fill")
-                                .font(.system(size: 52))
-                                .foregroundStyle(HomeCrewTheme.primaryPurple)
-                            
-                            Image(systemName: "checkmark.square.fill")
-                                .font(.system(size: 32))
-                                .foregroundStyle(HomeCrewTheme.mintGreen)
-                                .background(
-                                    Circle()
-                                        .fill(HomeCrewTheme.background)
-                                        .frame(width: 34, height: 34)
-                                )
-                                .offset(x: 38, y: 38)
-                        }
-                        
-                        Text("Manage your profile and household")
-                            .font(.subheadline)
-                            .foregroundStyle(HomeCrewTheme.textSecondary)
-                    }
-                    .padding(.top, 20)
-                    
-                    // Profile information
-                    SectionTitle(title: "Profile Information")
-                    
-                    EditProfileRow(
-                        icon: "person.fill",
-                        iconColor: HomeCrewTheme.primaryPurple,
-                        title: "Full Name",
-                        subtitle: fullName,
-                        showEditIcon: true
-                    )
-                    
-                    // Household settings
-                    SectionTitle(title: "Household Settings")
-                    
-                    EditProfileRow(
-                        icon: "house.fill",
-                        iconColor: HomeCrewTheme.darkBlue,
-                        title: "Household Name",
-                        subtitle: householdName,
-                        showEditIcon: true
-                    )
-                    
-                    EditProfileRow(
-                        icon: "rectangle.portrait.and.arrow.right",
-                        iconColor: HomeCrewTheme.primaryPurple,
-                        title: "Leave Household",
-                        subtitle: nil,
-                        showEditIcon: true
-                    )
-                    
-                    EditProfileRow(
-                        icon: "trash.fill",
-                        iconColor: .red,
-                        title: "Delete Household",
-                        subtitle: nil,
-                        showEditIcon: true
-                    )
-                    
-                    // Preferences
-                    SectionTitle(title: "Preferences")
-                    
-                    ToggleRow(
-                        icon: "bell.fill",
-                        iconColor: HomeCrewTheme.darkBlue,
-                        title: "Task Reminder",
-                        isOn: $taskReminder
-                    )
-                    
-                    ToggleRow(
-                        icon: "moon.fill",
-                        iconColor: HomeCrewTheme.primaryPurple,
-                        title: "Dark Mode",
-                        isOn: $darkMode
-                    )
-                    
-                    // Log out button
-                    Button {
-                        // Dummy action
-                    } label: {
-                        HStack {
-                            Image(systemName: "rectangle.portrait.and.arrow.right")
-                                .font(.title2)
-                            
-                            Spacer()
-                            
-                            Text("Log Out")
-                                .font(.headline)
-                            
-                            Spacer()
-                        }
-                        .padding()
-                        .frame(height: HomeCrewTheme.cardHeight)
-                        .background(HomeCrewTheme.cardBackground)
-                        .foregroundStyle(HomeCrewTheme.darkBlue)
-                        .clipShape(RoundedRectangle(cornerRadius: HomeCrewTheme.cornerRadius))
-                    }
-                    .padding(.top, 16)
-                }
-                .padding()
-            }
-            .background(HomeCrewTheme.background)
-            .navigationTitle("Edit Profile")
-            .navigationBarTitleDisplayMode(.inline)
-            .toolbar {
-                ToolbarItem(placement: .topBarLeading) {
-                    Button {
-                        // Dummy close action
-                    } label: {
-                        Image(systemName: "xmark")
-                            .font(.headline)
-                            .foregroundStyle(HomeCrewTheme.darkBlue)
-                            .padding(10)
-                            .background(HomeCrewTheme.cardBackground)
-                            .clipShape(Circle())
-                    }
-                }
+        ScrollView {
+            VStack(spacing: 24) {
                 
-                ToolbarItem(placement: .topBarTrailing) {
-                    Button("Save") {
-                        // Dummy save action
-                    }
-                    .font(.headline)
-                    .foregroundStyle(HomeCrewTheme.primaryPurple)
+                profileHeader
+                
+                sectionTitle("Profile Information")
+                
+                profileRow(
+                    icon: "person.fill",
+                    iconColor: HomeCrewTheme.primaryPurple,
+                    title: "Full Name",
+                    subtitle: fullName,
+                    showEditIcon: true
+                )
+                
+                sectionTitle("Household Settings")
+                
+                profileRow(
+                    icon: "house.fill",
+                    iconColor: HomeCrewTheme.darkBlue,
+                    title: "Household Name",
+                    subtitle: householdName,
+                    showEditIcon: true
+                )
+                
+                profileRow(
+                    icon: "rectangle.portrait.and.arrow.right",
+                    iconColor: HomeCrewTheme.primaryPurple,
+                    title: "Leave Household",
+                    subtitle: nil,
+                    showEditIcon: true
+                )
+                
+                profileRow(
+                    icon: "trash.fill",
+                    iconColor: .red,
+                    title: "Delete Household",
+                    subtitle: nil,
+                    showEditIcon: true
+                )
+                
+                sectionTitle("Preferences")
+                
+                toggleRow(
+                    icon: "bell.fill",
+                    iconColor: HomeCrewTheme.darkBlue,
+                    title: "Task Reminder",
+                    isOn: $taskReminder
+                )
+                
+                toggleRow(
+                    icon: "moon.fill",
+                    iconColor: HomeCrewTheme.primaryPurple,
+                    title: "Dark Mode",
+                    isOn: $darkMode
+                )
+                
+                logoutButton
+            }
+            .padding()
+        }
+        .background(HomeCrewTheme.background)
+        .navigationTitle("Edit Profile")
+        .navigationBarTitleDisplayMode(.inline)
+        .toolbar {
+            ToolbarItem(placement: .topBarTrailing) {
+                Button("Save") {
+                    // Dummy save action
                 }
+                .font(.headline)
+                .foregroundStyle(HomeCrewTheme.primaryPurple)
             }
         }
     }
-}
-
-struct SectionTitle: View {
-    let title: String
     
-    var body: some View {
+    // MARK: - Profile Header
+    
+    private var profileHeader: some View {
+        VStack(spacing: 10) {
+            ZStack {
+                Circle()
+                    .fill(HomeCrewTheme.primaryPurple.opacity(0.12))
+                    .frame(width: 120, height: 120)
+                
+                Image(systemName: "person.2.fill")
+                    .font(.system(size: 52))
+                    .foregroundStyle(HomeCrewTheme.primaryPurple)
+                
+                Image(systemName: "checkmark.square.fill")
+                    .font(.system(size: 32))
+                    .foregroundStyle(HomeCrewTheme.mintGreen)
+                    .background(
+                        Circle()
+                            .fill(HomeCrewTheme.background)
+                            .frame(width: 34, height: 34)
+                    )
+                    .offset(x: 38, y: 38)
+            }
+            
+            Text("Manage your profile and household")
+                .font(.subheadline)
+                .foregroundStyle(HomeCrewTheme.textSecondary)
+        }
+        .padding(.top, 20)
+    }
+    
+    // MARK: - Section Title
+    
+    private func sectionTitle(_ title: String) -> some View {
         HStack {
             Text(title)
                 .font(.headline)
@@ -171,16 +134,16 @@ struct SectionTitle: View {
             Spacer()
         }
     }
-}
-
-struct EditProfileRow: View {
-    let icon: String
-    let iconColor: Color
-    let title: String
-    let subtitle: String?
-    let showEditIcon: Bool
     
-    var body: some View {
+    // MARK: - Profile Row
+    
+    private func profileRow(
+        icon: String,
+        iconColor: Color,
+        title: String,
+        subtitle: String?,
+        showEditIcon: Bool
+    ) -> some View {
         HStack(spacing: 18) {
             Image(systemName: icon)
                 .font(.title2)
@@ -212,15 +175,15 @@ struct EditProfileRow: View {
         .background(HomeCrewTheme.cardBackground)
         .clipShape(RoundedRectangle(cornerRadius: HomeCrewTheme.cornerRadius))
     }
-}
-
-struct ToggleRow: View {
-    let icon: String
-    let iconColor: Color
-    let title: String
-    @Binding var isOn: Bool
     
-    var body: some View {
+    // MARK: - Toggle Row
+    
+    private func toggleRow(
+        icon: String,
+        iconColor: Color,
+        title: String,
+        isOn: Binding<Bool>
+    ) -> some View {
         HStack(spacing: 18) {
             Image(systemName: icon)
                 .font(.title2)
@@ -233,7 +196,7 @@ struct ToggleRow: View {
             
             Spacer()
             
-            Toggle("", isOn: $isOn)
+            Toggle("", isOn: isOn)
                 .labelsHidden()
                 .tint(HomeCrewTheme.mintGreen)
         }
@@ -242,8 +205,36 @@ struct ToggleRow: View {
         .background(HomeCrewTheme.cardBackground)
         .clipShape(RoundedRectangle(cornerRadius: HomeCrewTheme.cornerRadius))
     }
+    
+    // MARK: - Log Out Button
+    
+    private var logoutButton: some View {
+        Button {
+            // Dummy logout action
+        } label: {
+            HStack {
+                Image(systemName: "rectangle.portrait.and.arrow.right")
+                    .font(.title2)
+                
+                Spacer()
+                
+                Text("Log Out")
+                    .font(.headline)
+                
+                Spacer()
+            }
+            .padding()
+            .frame(height: HomeCrewTheme.cardHeight)
+            .background(HomeCrewTheme.cardBackground)
+            .foregroundStyle(HomeCrewTheme.darkBlue)
+            .clipShape(RoundedRectangle(cornerRadius: HomeCrewTheme.cornerRadius))
+        }
+        .padding(.top, 16)
+    }
 }
 
 #Preview {
-    EditProfileView()
+    NavigationStack {
+        EditProfileView()
+    }
 }
