@@ -43,6 +43,7 @@ struct TodoView: View {
                             )
                         )
                         .font(.callout)
+                        .foregroundStyle(HomeCrewTheme.textSecondary)
 
                         HStack(alignment: .center) {
                             VStack(alignment: .leading, spacing: 4) {

@@ -34,7 +34,7 @@ struct ChatView: View {
             }
 
         }
-//        .navigationTitle("Chat") //Verkar inte fungera pga TabView
+        .navigationTitle("Chat") //Verkar inte fungera pga TabView
 
     }
 }
