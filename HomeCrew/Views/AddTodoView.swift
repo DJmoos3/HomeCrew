@@ -31,29 +31,41 @@ struct AddTodoView: View {
     }
     
     var body: some View {
-        VStack {
+        VStack(spacing: 20) {
+            
             TextField("Add a new task", text: $taskTitle)
                 .padding()
-                .background(Color(.secondarySystemBackground))
-                .cornerRadius(10)
+                .background(HomeCrewTheme.cardBackground)
+                .cornerRadius(12)
+                .foregroundStyle(HomeCrewTheme.textPrimary)
             
-            VStack(alignment: .leading) {
+            VStack(alignment: .leading, spacing: 10) {
                 Text("Category")
                     .font(.headline)
+                    .foregroundStyle(HomeCrewTheme.textPrimary)
                 
-                ScrollView(.horizontal) {
-                    HStack {
+                ScrollView(.horizontal, showsIndicators: false) {
+                    HStack(spacing: 10) {
                         ForEach(categories.indices, id: \.self) { index in
-                            HStack {
+                            HStack(spacing: 6) {
                                 Image(systemName: categoryIcons[index])
                                 Text(categories[index])
                             }
-                            .padding()
-                            .frame(maxWidth: .infinity)
-                            .frame(height: 28)
-                            .background(RoundedRectangle(cornerRadius: 8)
-                                .foregroundStyle(selectedCategory == categories[index] ? .black : Color(.systemGray3)))
-                            .foregroundStyle(selectedCategory == categories[index] ? .white : .black)
+                            .padding(.vertical, 8)
+                            .padding(.horizontal, 12)
+                            .background(
+                                RoundedRectangle(cornerRadius: 10)
+                                    .foregroundStyle(
+                                        selectedCategory == categories[index]
+                                        ? HomeCrewTheme.darkBlue
+                                        : HomeCrewTheme.cardBackground
+                                    )
+                            )
+                            .foregroundStyle(
+                                selectedCategory == categories[index]
+                                ? .white
+                                : HomeCrewTheme.textPrimary
+                            )
                             .onTapGesture {
                                 selectedCategory = categories[index]
                             }
@@ -62,109 +74,128 @@ struct AddTodoView: View {
                 }
             }
             
-            VStack(alignment: .leading) {
+            VStack(alignment: .leading, spacing: 10) {
                 Text("Day")
                     .font(.headline)
+                    .foregroundStyle(HomeCrewTheme.textPrimary)
                 
                 HStack {
                     ForEach(days.indices, id: \.self) { index in
                         VStack {
                             Text(days[index])
                                 .font(.subheadline.bold())
+                            
                             Text(currentWeek[index].formatted(.dateTime.day()))
                                 .font(.title3.bold())
                         }
-                        .padding(4)
+                        .padding(5)
                         .frame(maxWidth: .infinity)
-                        .background(RoundedRectangle(cornerRadius: 12)
-                            .foregroundStyle(selectedDay == index ? .black : Color(.systemGray3)))
-                        .foregroundStyle(selectedDay == index ? .white : .black)
+                        .background(
+                            RoundedRectangle(cornerRadius: 12)
+                                .foregroundStyle(
+                                    selectedDay == index
+                                    ? HomeCrewTheme.primaryPurple
+                                    : HomeCrewTheme.cardBackground
+                                )
+                        )
+                        .foregroundStyle(
+                            selectedDay == index
+                            ? .white
+                            : HomeCrewTheme.textPrimary
+                        )
                         .onTapGesture {
                             selectedDay = index
                         }
                     }
                 }
-                .padding(.bottom)
             }
             
-            HStack {
+            HStack(spacing: 16) {
+                
                 VStack(alignment: .leading) {
                     Text("Time")
                         .font(.headline)
+                        .foregroundStyle(HomeCrewTheme.textPrimary)
                     
                     HStack {
                         Image(systemName: "clock")
+                            .foregroundStyle(HomeCrewTheme.textSecondary)
+                        
                         DatePicker("", selection: $selectedTime, displayedComponents: .hourAndMinute)
                             .labelsHidden()
+                            .tint(HomeCrewTheme.primaryPurple)
                     }
                     .padding()
-                    .background(RoundedRectangle(cornerRadius: 12)
-                        .foregroundStyle(Color(.systemGray3)))
-                    .multilineTextAlignment(.leading)
+                    .background(HomeCrewTheme.cardBackground)
+                    .cornerRadius(12)
                 }
                 
-                Spacer()
-                
                 VStack(alignment: .leading) {
-                    Text("Time Duration")
+                    Text("Duration")
                         .font(.headline)
+                        .foregroundStyle(HomeCrewTheme.textPrimary)
                     
-                    HStack {
+                    HStack(spacing: 10) {
                         Button {
                             timeDuration = max(0, timeDuration - 5)
                         } label: {
                             Image(systemName: "minus")
-                                .padding()
-                                .frame(width: 35, height: 35)
-                                .background(RoundedRectangle(cornerRadius: 8)
-                                    .foregroundStyle(.gray))
-                                .foregroundStyle(.black)
+                                .foregroundStyle(.white)
+                                .frame(width: 32, height: 32)
+                                .background(HomeCrewTheme.darkBlue)
+                                .clipShape(RoundedRectangle(cornerRadius: 8))
                         }
                         .disabled(timeDuration == 0)
                         
                         Text("\(timeDuration) min")
+                            .foregroundStyle(HomeCrewTheme.textPrimary)
                         
                         Button {
                             timeDuration += 5
                         } label: {
                             Image(systemName: "plus")
-                                .padding()
-                                .frame(width: 35, height: 35)
-                                .background(RoundedRectangle(cornerRadius: 8)
-                                    .foregroundStyle(.gray))
-                                .foregroundStyle(.black)
+                                .foregroundStyle(.white)
+                                .frame(width: 32, height: 32)
+                                .background(HomeCrewTheme.darkBlue)
+                                .clipShape(RoundedRectangle(cornerRadius: 8))
                         }
                     }
                     .padding()
-                    .background(RoundedRectangle(cornerRadius: 12)
-                        .foregroundStyle(Color(.systemGray3)))
+                    .background(HomeCrewTheme.cardBackground)
+                    .cornerRadius(12)
                 }
             }
             
-            
-            VStack(alignment: .leading) {
+            VStack(alignment: .leading, spacing: 10) {
                 Text("Repeat")
                     .font(.headline)
+                    .foregroundStyle(HomeCrewTheme.textPrimary)
                 
                 LazyVGrid(
-                    columns: [
-                        GridItem(.adaptive(minimum: 120), spacing: 8)
-                    ],
+                    columns: [GridItem(.adaptive(minimum: 120), spacing: 8)],
                     spacing: 8
                 ) {
-                    ForEach(repeatChoice, id: \.self) { index in
+                    ForEach(repeatChoice, id: \.self) { option in
                         
-                        Text(index)
+                        Text(option)
                             .padding(.vertical, 8)
                             .padding(.horizontal, 12)
                             .frame(maxWidth: .infinity)
                             .background(
-                                RoundedRectangle(cornerRadius: 8)
-                                    .foregroundStyle(selectedRepeat == index ? .black : Color(.systemGray3))
+                                RoundedRectangle(cornerRadius: 10)
+                                    .foregroundStyle(
+                                        selectedRepeat == option
+                                        ? HomeCrewTheme.darkBlue
+                                        : HomeCrewTheme.cardBackground
+                                    )
                             )
-                            .foregroundStyle(selectedRepeat == index ? .white : .black)
+                            .foregroundStyle(
+                                selectedRepeat == option
+                                ? .white
+                                : HomeCrewTheme.textPrimary
+                            )
                             .onTapGesture {
-                                selectedRepeat = index
+                                selectedRepeat = option
                             }
                     }
                 }
@@ -173,18 +204,19 @@ struct AddTodoView: View {
             Spacer()
             
             Button {
-                
+                // Add task action
             } label: {
                 Text("Add Task")
                     .frame(maxWidth: .infinity)
                     .padding()
-                    .background(Color(.systemGray3))
-                    .foregroundColor(.black)
-                    .cornerRadius(10)
+                    .background(HomeCrewTheme.darkBlue)
+                    .foregroundStyle(.white)
+                    .cornerRadius(12)
+                    .shadow(color: HomeCrewTheme.darkBlue.opacity(0.2), radius: 8, x: 0, y: 4)
             }
-            
         }
         .padding()
+        .background(HomeCrewTheme.background)
     }
 }
 

@@ -114,6 +114,7 @@ struct ChatView: View {
             .background(HomeCrewTheme.background)
             .navigationBarTitleDisplayMode(.inline)
         }
+        .navigationTitle("Chat")
     }
 }
 
