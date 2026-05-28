@@ -38,22 +38,37 @@ struct ChatRoomView: View {
             }
             
             Divider()
+             .overlay(HomeCrewTheme.cardBackground)
 
             HStack {
                 TextField("Skriv ett meddelande...", text: $messageText, axis: .vertical)
                     .lineLimit(1...5)
-                    .textFieldStyle(.roundedBorder)
+                    .padding(12)
+                    .background(HomeCrewTheme.cardBackground)
+                                .foregroundStyle(HomeCrewTheme.textPrimary)
+                                .clipShape(
+                                               RoundedRectangle(
+                                                   cornerRadius: HomeCrewTheme.cornerRadius
+                                               )
+                                           )
+                   // .textFieldStyle(.roundedBorder)
                 Button {
                     messages.append(Message(text: messageText, isMe: true))
                     messageText = ""
                 } label: {
                     Image(systemName: "paperplane.fill")
                         .font(.title3)
+                        .foregroundStyle(HomeCrewTheme.background)
+                                        .frame(width: 44, height: 44)
+                                        .background(HomeCrewTheme.primaryPurple)
+                                        .clipShape(Circle())
                 }
                 .disabled(messageText.isEmpty)
             }
             .padding()
+            .background(HomeCrewTheme.background)
         }
+        .background(HomeCrewTheme.background)
         .navigationTitle(chatRoom.name)
         .navigationBarTitleDisplayMode(.inline)
     }
@@ -68,12 +83,19 @@ struct MessageCell: View {
             if message.isMe {
                 Spacer()
             } else {
-                Circle().frame(width: 25, height: 25)
+                Circle()
+                    .fill(HomeCrewTheme.primaryPurple)
+                    .frame(width: 25, height: 25)
+                    
+                
             }
             Text(message.text)
                 .padding(12)
-                .background(message.isMe ? Color.blue : Color.gray.opacity(0.2))
-                .foregroundStyle(message.isMe ? .white : .primary)
+                .background(message.isMe ? HomeCrewTheme.primaryPurple
+                            : HomeCrewTheme.cardBackground)
+                .foregroundStyle(message.isMe ? HomeCrewTheme.background
+                                 : HomeCrewTheme.textPrimary
+                             )
                 .clipShape(RoundedRectangle(cornerRadius: 16))
                 .frame(
                     maxWidth: 260,

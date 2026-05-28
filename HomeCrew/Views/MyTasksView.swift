@@ -13,17 +13,21 @@ struct MyTasksView: View {
             VStack(alignment: .leading) {
                 Text("NEXT TASK")
                     .font(.headline)
+                    .foregroundStyle(.white)
                 
                 HStack {
                     Image(systemName: "circle")
                         .font(.system(size: 34))
+                        .foregroundStyle(HomeCrewTheme.mintGreen)
                     
                     VStack(alignment: .leading) {
                         Text("Task 1")
+                            .foregroundStyle(.white)
                         HStack {
                             Image(systemName: "clock")
                             Text("06:00 PM · 20 min")
                         }
+                        .foregroundStyle(.white)
                     }
                     Spacer()
                 }
@@ -32,14 +36,15 @@ struct MyTasksView: View {
             Image(systemName: "fork.knife")
                 .padding()
                 .frame(width: 40, height: 40)
+                .foregroundStyle(HomeCrewTheme.darkBlue)
                 .background(RoundedRectangle(cornerRadius: 12)
-                    .foregroundStyle(.black))
-                .foregroundStyle(.white)
+                        .fill(HomeCrewTheme.mintGreen)
+                )
         }
         .padding()
         .frame(maxWidth: .infinity)
         .background(RoundedRectangle(cornerRadius: 16)
-            .foregroundStyle(Color(.systemGray3)))
+            .fill(HomeCrewTheme.darkBlue))
         .padding(.bottom)
         
         VStack(alignment: .leading) {
@@ -51,6 +56,7 @@ struct MyTasksView: View {
                         HStack {
                             Image(systemName: "circle")
                                 .font(.system(size: 34))
+                                .foregroundStyle(HomeCrewTheme.primaryPurple)
                             
                             VStack(alignment: .leading) {
                                 Text("Task 1")
@@ -67,7 +73,7 @@ struct MyTasksView: View {
                                 .frame(width: 40, height: 40)
                                 .background(
                                     RoundedRectangle(cornerRadius: 12)
-                                        .fill(.black)
+                                        .fill(HomeCrewTheme.primaryPurple)
                                 )
                                 .foregroundStyle(.white)
                         }
@@ -84,9 +90,10 @@ struct MyTasksView: View {
             .padding()
             .background(
                 RoundedRectangle(cornerRadius: 16)
-                    .fill(Color(.systemGray3))
+                    .fill(HomeCrewTheme.darkBlue.opacity(0.04))
             )
         }
+        
     }
 }
 

@@ -16,6 +16,7 @@ struct EditProfileView: View {
     @AppStorage("taskReminderEnabled") private var taskReminder = true
     
     var body: some View {
+
         ScrollView {
             VStack(spacing: 24) {
                 

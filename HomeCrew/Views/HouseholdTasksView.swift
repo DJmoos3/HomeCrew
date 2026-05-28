@@ -19,6 +19,7 @@ struct HouseholdTasksView: View {
                         HStack {
                             Image(systemName: "circle")
                                 .font(.system(size: 34))
+                                .foregroundStyle(.black.opacity(0.4))
                             
                             VStack(alignment: .leading) {
                                 Text("Task 1")
@@ -36,7 +37,7 @@ struct HouseholdTasksView: View {
                                 .frame(width: 40, height: 40)
                                 .background(
                                     RoundedRectangle(cornerRadius: 12)
-                                        .fill(.black)
+                                        .fill(HomeCrewTheme.primaryPurple)
                                 )
                                 .foregroundStyle(.white)
                         }
@@ -44,7 +45,7 @@ struct HouseholdTasksView: View {
                         .frame(maxWidth: .infinity)
                         .background(
                             RoundedRectangle(cornerRadius: 16)
-                                .fill(Color(.systemGray3))
+                                .fill(HomeCrewTheme.primaryPurple.opacity(0.08))
                         )
                     }
                 }
