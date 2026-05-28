@@ -18,7 +18,6 @@ struct TodoView: View {
         case householdTasks
     }
     
-    
     private let days = ["MON", "TUE", "WED", "THU", "FRI", "SAT", "SUN"]
     
     private var currentWeek: [Date] {
@@ -45,14 +44,17 @@ struct TodoView: View {
                     .font(.callout)
                     Text("Hello, User")
                         .font(.largeTitle.bold())
+                        .foregroundStyle(HomeCrewTheme.textPrimary)
                     Text("You have **4 tasks** left today")
                         .font(.subheadline)
+                        .foregroundStyle(HomeCrewTheme.textSecondary)
                 }
                 
                 Spacer()
                 
-                Image(systemName: "bell")
+                Image(systemName: "bubble.right")
                     .font(.system(size: 25))
+                    .foregroundStyle(HomeCrewTheme.primaryPurple)
             }
             .padding(.bottom)
             
@@ -65,9 +67,11 @@ struct TodoView: View {
                         .font(.headline)
                         .frame(maxWidth: .infinity)
                         .frame(height: 40)
-                        .background(RoundedRectangle(cornerRadius: 12)
-                            .foregroundStyle(selectedTab == .myTasks ? .black : Color(.systemGray3)))
-                        .foregroundStyle(selectedTab == .myTasks ? .white : .black)
+                        .background(
+                            RoundedRectangle(cornerRadius: 12)
+                                .foregroundStyle(selectedTab == .myTasks ? HomeCrewTheme.darkBlue : HomeCrewTheme.cardBackground)
+                        )
+                        .foregroundStyle(selectedTab == .myTasks ? .white : HomeCrewTheme.textPrimary)
                 }
                 
                 Button {
@@ -78,9 +82,11 @@ struct TodoView: View {
                         .font(.headline)
                         .frame(maxWidth: .infinity)
                         .frame(height: 40)
-                        .background(RoundedRectangle(cornerRadius: 12)
-                            .foregroundStyle(selectedTab == .householdTasks ? .black : Color(.systemGray3)))
-                        .foregroundStyle(selectedTab == .householdTasks ? .white : .black)
+                        .background(
+                            RoundedRectangle(cornerRadius: 12)
+                                .foregroundStyle(selectedTab == .householdTasks ? HomeCrewTheme.darkBlue : HomeCrewTheme.cardBackground)
+                        )
+                        .foregroundStyle(selectedTab == .householdTasks ? .white : HomeCrewTheme.textPrimary)
                 }
             }
             .padding(.bottom)
@@ -98,8 +104,11 @@ struct TodoView: View {
                     .padding(4)
                     .frame(maxWidth: .infinity)
                     .background(RoundedRectangle(cornerRadius: 12)
-                        .foregroundStyle(Calendar.current.isDateInToday(currentWeek[index]) ? .black : Color(.systemGray3)))
-                    .foregroundStyle(Calendar.current.isDateInToday(currentWeek[index]) ? .white : .black)
+                        .foregroundStyle(Calendar.current.isDateInToday(currentWeek[index]) ? HomeCrewTheme.primaryPurple : HomeCrewTheme.cardBackground))
+                    .foregroundStyle(Calendar.current.isDateInToday(currentWeek[index]) ? .white : HomeCrewTheme.textPrimary)
+                    .shadow(
+                        color: Calendar.current.isDateInToday(currentWeek[index]) ? HomeCrewTheme.primaryPurple.opacity(0.25) : .clear, radius: 6, x: 0, y: 4
+                    )
                 }
             }
             .padding(.bottom)
@@ -115,6 +124,7 @@ struct TodoView: View {
                 }
             }
             
+            Spacer()
         } //Main VStack end
         .padding()
         .overlay(alignment: .bottomTrailing) {
@@ -125,15 +135,16 @@ struct TodoView: View {
                             .font(.title.bold())
                             .foregroundStyle(.white)
                             .frame(width: 60, height: 60)
-                            .background(.gray)
+                            .background(HomeCrewTheme.darkBlue)
                             .clipShape(Circle())
-                            .shadow(radius: 6)
+                            .shadow(color: HomeCrewTheme.darkBlue.opacity(0.25), radius: 10, x: 0, y: 6)
                     }
                     .padding()
                     .sheet(isPresented: $showingSheet) {
                         AddTodoView()
                     }
                 }
+        .background(HomeCrewTheme.background)
     }
 }
 
