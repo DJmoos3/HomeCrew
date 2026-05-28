@@ -69,6 +69,7 @@ struct TodoView: View {
 
                         NavigationLink {
                             ProfileView()
+                                .environment(authViewModel)
                         } label: {
                             Image(systemName: "person.crop.circle.fill")
                                 .font(.system(size: 30))
