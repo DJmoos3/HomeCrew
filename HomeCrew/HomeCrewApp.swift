@@ -15,14 +15,17 @@ class AppDelegate: NSObject, UIApplicationDelegate {
             .LaunchOptionsKey: Any]? = nil
     ) -> Bool {
         FirebaseApp.configure()
-
         return true
     }
 }
 
 @main
 struct HomeCrewApp: App {
-    // register app delegate for Firebase setup
+
+    //Saves the user's dark mode preference locally
+    @AppStorage("darkModeEnabled") private var darkMode = false
+
+    //Register app delegate for Firebase setup
     @UIApplicationDelegateAdaptor(AppDelegate.self) var delegate
 
     @State private var authViewModel = AuthViewModel()
@@ -30,15 +33,11 @@ struct HomeCrewApp: App {
     
     var body: some Scene {
         WindowGroup {
-            //            NavigationStack {
-            //                ContentView()
-            //            }
-            //            .environmentObject(authViewModel)
-
             NavigationStack {
                 LoginView()
                     .environment(authViewModel)
             }
+            .preferredColorScheme(darkMode ? .dark : .light)
         }
     }
 }

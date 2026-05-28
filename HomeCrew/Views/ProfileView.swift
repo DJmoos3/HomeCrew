@@ -10,174 +10,187 @@ import SwiftUI
 //Member Row
 
 struct MemberRow: View {
-    
+
     let member: Member
-    
+
     var body: some View {
         HStack(spacing: 15) {
-            
             Image(systemName: "person.crop.circle.fill")
                 .font(.title2)
-                .foregroundColor(.gray)
-            
+                .foregroundStyle(HomeCrewTheme.primaryPurple)
             VStack(alignment: .leading, spacing: 4) {
-                
                 Text(member.name)
                     .fontWeight(.medium)
-                
+                    .foregroundStyle(HomeCrewTheme.textPrimary)
                 Text(member.role)
                     .font(.subheadline)
-                    .foregroundColor(.gray)
+                    .foregroundStyle(HomeCrewTheme.textSecondary)
             }
-            
             Spacer()
         }
         .padding()
-        .background(Color(.systemGray6))
-        .cornerRadius(12)
+        .frame(minHeight: HomeCrewTheme.cardHeight)
+        .background(HomeCrewTheme.cardBackground)
+        .clipShape(RoundedRectangle(cornerRadius: HomeCrewTheme.cornerRadius))
     }
 }
 
 //Profile View
 
 struct ProfileView: View {
-    
+
     //ViewModel
     @State private var profileViewModel = ProfileViewModel()
     @Environment(AuthViewModel.self) private var authViewModel
-    
+
     var body: some View {
-        
         NavigationView {
-            
             VStack(spacing: 0) {
-                
+
                 //Top Bar
                 HStack {
-                    
                     NavigationLink {
-
-                    EditProfileView()
-
-                 } label: {
-
-                   Text("Edit")
-
-                }
-                    
-                    Spacer()
-                    
-                    Button("Logout") {
-                        
+                        EditProfileView()
+                    } label: {
+                        Text("Edit")
+                            .fontWeight(.semibold)
+                            .foregroundStyle(HomeCrewTheme.primaryPurple)
                     }
+                    Spacer()
+                    Button("Logout") {
+                    }
+                    .fontWeight(.semibold)
+                    .foregroundStyle(HomeCrewTheme.darkBlue)
                 }
                 .padding(.horizontal)
                 .padding(.top)
-                
+
                 //Main Content
                 ScrollView {
-                    
                     VStack(alignment: .leading, spacing: 24) {
-                        
+
                         //Title
                         Text("Profile")
                             .font(.largeTitle)
                             .fontWeight(.bold)
-                        
+                            .foregroundStyle(HomeCrewTheme.textPrimary)
+
                         //Profile Section
                         HStack(alignment: .center, spacing: 20) {
-                            
                             ZStack(alignment: .bottomTrailing) {
-                                
                                 Image(systemName: "person.crop.circle")
                                     .resizable()
                                     .scaledToFit()
                                     .frame(width: 90, height: 90)
-                                    .foregroundColor(.gray)
-                                
+                                    .foregroundStyle(
+                                        HomeCrewTheme.primaryPurple.opacity(
+                                            0.75
+                                        )
+                                    )
                                 Button(action: {
                                     //Change profile image
                                 }) {
                                     Image(systemName: "plus")
-                                        .foregroundColor(.white)
+                                        .foregroundStyle(.white)
                                         .padding(8)
-                                        .background(Color.purple)
+                                        .background(HomeCrewTheme.primaryPurple)
                                         .clipShape(Circle())
                                 }
                             }
-                            
+
                             VStack(alignment: .leading, spacing: 5) {
-                                
-                                Text(authViewModel.currentUser?.username ?? "No username")
+                                Text(
+                                    authViewModel.currentUser?.username
+                                        ?? "No username"
+                                )
                                 .font(.headline)
-                                
+                                .foregroundStyle(HomeCrewTheme.textPrimary)
                                 Text(
                                     profileViewModel.fullName.isEmpty
-                                    ? "No name set"
-                                    : profileViewModel.fullName
+                                        ? "No name set"
+                                        : profileViewModel.fullName
                                 )
-                                .foregroundColor(.gray)
-                                
-                                Text(authViewModel.currentUser?.email ?? "No email set")
-                                    .font(.subheadline)
-                                    .foregroundColor(.gray)
+                                .foregroundStyle(HomeCrewTheme.textSecondary)
+
+                                Text(
+                                    authViewModel.currentUser?.email
+                                        ?? "No email set"
+                                )
+                                .font(.subheadline)
+                                .foregroundColor(HomeCrewTheme.textSecondary)
                             }
-                            
                             Spacer()
                         }
-                        
+
                         //Household Section
                         VStack(alignment: .leading, spacing: 15) {
-                            
+
                             Text("Household")
                                 .font(.headline)
-                            
+                                .foregroundStyle(HomeCrewTheme.textPrimary)
+
                             Text("No household yet")
+                                .foregroundStyle(HomeCrewTheme.textPrimary)
                                 .frame(maxWidth: .infinity, alignment: .leading)
                                 .padding()
-                                .background(Color(.systemGray6))
-                                .cornerRadius(12)
-                            
+                                .background(HomeCrewTheme.cardBackground)
+                                .clipShape(
+                                    RoundedRectangle(
+                                        cornerRadius: HomeCrewTheme.cornerRadius
+                                    )
+                                )
+
                             Button(action: {
                                 //Create or join household
                             }) {
                                 Text("Create / Join Household")
                                     .fontWeight(.semibold)
-                                    .foregroundColor(.blue)
+                                    .foregroundStyle(
+                                        HomeCrewTheme.primaryPurple
+                                    )
                                     .frame(maxWidth: .infinity)
                             }
                         }
-                        
+
                         //Member Section
                         VStack(alignment: .leading, spacing: 12) {
-                            
                             Text("Members")
                                 .font(.headline)
-                            
+                                .foregroundStyle(HomeCrewTheme.textPrimary)
+
                             // Empty State
                             if profileViewModel.members.isEmpty {
-                                
                                 Text("No members yet. Invite someone!")
-                                    .foregroundColor(.gray)
+                                    .foregroundStyle(
+                                        HomeCrewTheme.textSecondary
+                                    )
                                     .padding()
-                                    .frame(maxWidth: .infinity, alignment: .leading)
-                                    .background(Color(.systemGray6))
-                                    .cornerRadius(12)
-                                
+                                    .frame(
+                                        maxWidth: .infinity,
+                                        alignment: .leading
+                                    )
+                                    .background(HomeCrewTheme.cardBackground)
+                                    .clipShape(
+                                        RoundedRectangle(
+                                            cornerRadius: HomeCrewTheme
+                                                .cornerRadius
+                                        )
+                                    )
                             } else {
-                                
                                 ForEach(profileViewModel.members) { member in
                                     MemberRow(member: member)
                                 }
                             }
-                            
+
                             // Invite Button
                             Button(action: {
                                 profileViewModel.addTestMember()
                             }) {
                                 Text("Invite Members")
                                     .fontWeight(.semibold)
-                                    .foregroundColor(.blue)
+                                    .foregroundStyle(
+                                        HomeCrewTheme.primaryPurple
+                                    )
                                     .frame(maxWidth: .infinity)
                                     .padding(.top, 5)
                             }
@@ -185,16 +198,15 @@ struct ProfileView: View {
                     }
                     .padding()
                 }
-                
                 Spacer()
             }
+            .background(HomeCrewTheme.background)
             .navigationBarHidden(true)
         }
     }
 }
 
 //Preview
-
 #Preview {
     ProfileView()
 }
