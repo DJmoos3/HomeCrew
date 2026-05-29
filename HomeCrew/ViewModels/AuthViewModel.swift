@@ -16,6 +16,11 @@ final class AuthViewModel : ObservableObject    {
     @Published var errorMessage: String? = nil
     @Published var isSignedIn: Bool = false
     
+    init() {
+        if Auth.auth().currentUser != nil {
+            isSignedIn = true
+        }
+    }
     
     func clearFields() {
         email = ""
@@ -66,6 +71,15 @@ final class AuthViewModel : ObservableObject    {
                     errorMessage = error.localizedDescription
                 }
             }
+        }
+    }
+    
+    func signOut() {
+        do {
+            try Auth.auth().signOut()
+            isSignedIn = false
+        } catch {
+            print("Error signing out: \(error)")
         }
     }
 }
