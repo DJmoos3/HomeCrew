@@ -12,7 +12,7 @@ struct HouseholdTasksView: View {
         VStack(alignment: .leading) {
             Text("Today's Tasks")
                 .font(.headline)
-            
+
             ScrollView {
                 LazyVStack(spacing: 12) {
                     ForEach(0...5, id: \.self) { index in
@@ -20,18 +20,16 @@ struct HouseholdTasksView: View {
                             Image(systemName: "circle")
                                 .font(.system(size: 34))
                                 .foregroundStyle(.black.opacity(0.4))
-                            
                             VStack(alignment: .leading) {
                                 Text("Task 1")
-                                
                                 HStack {
                                     Image(systemName: "clock")
                                     Text("06:00 PM · 20 min")
                                 }
                             }
-                            
+
                             Spacer()
-                            
+
                             Image(systemName: "fork.knife")
                                 .padding()
                                 .frame(width: 40, height: 40)

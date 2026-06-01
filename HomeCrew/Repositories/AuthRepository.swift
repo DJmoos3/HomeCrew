@@ -1,5 +1,5 @@
 //
-//  AuthManager.swift
+//  AuthRepository.swift
 //  HomeCrew
 //
 //  Created by Isaac Strandh on 2026-05-18.
@@ -18,9 +18,9 @@ struct AuthDataResultModel{
     }
 }
 
-final class AuthManager{
+final class AuthRepository{
     
-    static let shared = AuthManager()
+    static let shared = AuthRepository()
     
     func getUser() throws -> AuthDataResultModel{
         guard let user = Auth.auth().currentUser else{

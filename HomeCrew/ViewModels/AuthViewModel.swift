@@ -5,50 +5,74 @@
 //  Created by Isaac Strandh on 2026-05-18.
 //
 
-import Foundation
-import Combine
 import FirebaseAuth
+import Foundation
+import Observation
+import FirebaseFirestore
 
-final class AuthViewModel : ObservableObject    {
-    @Published var email = ""
-    @Published var password = ""
-    
-    @Published var errorMessage: String? = nil
-    @Published var isSignedIn: Bool = false
-    
-    
+@Observable
+@MainActor
+final class AuthViewModel {
+    var email = ""
+    var username = ""
+    var password = ""
+    var currentUser: AppUser? = nil
+
+    var errorMessage: String? = nil
+    var isSignedIn: Bool = false
+
+    private let userRepository: UserRepository
+
+    init() {
+        self.userRepository = UserRepository()
+    }
+
     func clearFields() {
         email = ""
         password = ""
         isSignedIn = false
+        errorMessage = nil
     }
-    
-    
-    func signUp(){
-        guard !email.isEmpty && !password.isEmpty else{
-            print("No email or password")
+
+    func signUp() async {
+        guard !email.isEmpty && !password.isEmpty, !username.isEmpty else {
+            errorMessage = "Please enter email, username and password"
+            print("Please enter email, username and password")
             return
         }
-        
-        Task{
-            do{
-                let returnedUserData = try await AuthManager.shared.createUser(email: email, password: password)
-                isSignedIn = true
-                print("Success")
-                print(returnedUserData)
-            } catch{
-                print("Error: \(error)")
-            }
+
+        do {
+            let returnedUserData = try await AuthRepository.shared.createUser(
+                email: email,
+                password: password
+            )
             
+            try await userRepository.createUser(authUser: returnedUserData, username: username)
+
+            isSignedIn = true
+            password = ""
+            await fetchCurrentUser()
+            print("Success")
+            print(returnedUserData)
+        } catch {
+            isSignedIn = false
+            password = ""
+            errorMessage = error.localizedDescription
+            print("Error: \(error)")
         }
+
     }
-    
+
     func signIn() {
         errorMessage = nil
         Task {
             do {
-                try await AuthManager.shared.signIn(email: email, password: password)
+                try await AuthRepository.shared.signIn(
+                    email: email,
+                    password: password
+                )
                 isSignedIn = true
+                await fetchCurrentUser()
             } catch let error as NSError {
                 let authError = AuthErrorCode(rawValue: error.code)
                 isSignedIn = false
@@ -61,10 +85,23 @@ final class AuthViewModel : ObservableObject    {
                 case .invalidEmail:
                     errorMessage = "Invalid email address"
                 case .invalidCredential:
-                    errorMessage = "No account found with that email or incorrect password"
+                    errorMessage =
+                        "No account found with that email or incorrect password"
                 default:
                     errorMessage = error.localizedDescription
                 }
+            }
+        }
+    }
+    func fetchCurrentUser() async{
+        guard let uid = Auth.auth().currentUser?.uid else { return }
+        
+        Task {
+            do {
+                let snapshot = try await Firestore.firestore().collection("users").document(uid).getDocument()
+                currentUser = try snapshot.data(as: AppUser.self)
+            } catch {
+                print("Error fetching user: \(error)")
             }
         }
     }

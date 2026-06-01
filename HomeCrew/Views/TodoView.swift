@@ -8,6 +8,7 @@
 import SwiftUI
 
 struct TodoView: View {
+    @Environment(AuthViewModel.self) private var authViewModel
     
     @State private var showingSheet: Bool = false
     
@@ -44,24 +45,19 @@ struct TodoView: View {
                         )
                         .font(.callout)
                         .foregroundStyle(HomeCrewTheme.textSecondary)
-
                         HStack(alignment: .center) {
                             VStack(alignment: .leading, spacing: 4) {
-                                Text("Hello, User")
+                                Text("Hello, \(authViewModel.currentUser?.username ?? "User")")
                                     .font(.largeTitle.bold())
                                     .foregroundStyle(HomeCrewTheme.textPrimary)
-
                                 Text("You have **4 tasks** left today")
                                     .font(.subheadline)
                                     .foregroundStyle(HomeCrewTheme.textSecondary)
                             }
-
                             Spacer()
                         }
                     }
-
                     Spacer()
-
                     HStack(spacing: 16) {
                         NavigationLink {
                             ChatView()
@@ -73,6 +69,7 @@ struct TodoView: View {
 
                         NavigationLink {
                             ProfileView()
+                                .environment(authViewModel)
                         } label: {
                             Image(systemName: "person.crop.circle.fill")
                                 .font(.system(size: 30))
@@ -82,7 +79,7 @@ struct TodoView: View {
                     }
                 }
                 .padding(.bottom)
-                
+
                 HStack {
                     Button {
                         selectedTab = .myTasks
@@ -151,6 +148,11 @@ struct TodoView: View {
                 
                 Spacer()
             } //Main VStack end
+            .onAppear {
+                Task {
+                    await authViewModel.fetchCurrentUser()
+                }
+            }
             .padding()
             .overlay(alignment: .bottomTrailing) {
                 Button {

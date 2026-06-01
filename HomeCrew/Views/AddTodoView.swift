@@ -8,42 +8,47 @@
 import SwiftUI
 
 struct AddTodoView: View {
-    
+
     @State private var taskTitle: String = ""
     @State private var selectedCategory: String = "Kitchen"
     @State private var selectedDay: Int = 0
     @State private var selectedTime = Date()
     @State private var timeDuration: Int = 0
     @State private var selectedRepeat = "Once"
-    
+
     private let categories = ["Kitchen", "Bathroom", "Laundry", "Clean"]
-    private let categoryIcons = ["fork.knife", "bathtub", "dryer", "paintbrush"]
+    private let categoryIcons = [
+        "fork.knife", "bathtub", "dryer", "paintbrush",
+    ]
     private let days = ["MON", "TUE", "WED", "THU", "FRI", "SAT", "SUN"]
-    private let repeatChoice = ["Once", "Daily", "Weekly", "Every Other Week", "Monthly"]
-    
+    private let repeatChoice = [
+        "Once", "Daily", "Weekly", "Every Other Week", "Monthly",
+    ]
+
     private var currentWeek: [Date] {
         let calendar = Calendar.current
-        let startOfWeek = calendar.dateInterval(of: .weekOfYear, for: Date())!.start
-        
+        let startOfWeek = calendar.dateInterval(of: .weekOfYear, for: Date())!
+            .start
+
         return (0..<7).compactMap {
             calendar.date(byAdding: .day, value: $0, to: startOfWeek)
         }
     }
-    
+
     var body: some View {
         VStack(spacing: 20) {
-            
+
             TextField("Add a new task", text: $taskTitle)
                 .padding()
                 .background(HomeCrewTheme.cardBackground)
                 .cornerRadius(12)
                 .foregroundStyle(HomeCrewTheme.textPrimary)
-            
+
             VStack(alignment: .leading, spacing: 10) {
                 Text("Category")
                     .font(.headline)
                     .foregroundStyle(HomeCrewTheme.textPrimary)
-                
+
                 ScrollView(.horizontal, showsIndicators: false) {
                     HStack(spacing: 10) {
                         ForEach(categories.indices, id: \.self) { index in
@@ -57,14 +62,14 @@ struct AddTodoView: View {
                                 RoundedRectangle(cornerRadius: 10)
                                     .foregroundStyle(
                                         selectedCategory == categories[index]
-                                        ? HomeCrewTheme.darkBlue
-                                        : HomeCrewTheme.cardBackground
+                                            ? HomeCrewTheme.darkBlue
+                                            : HomeCrewTheme.cardBackground
                                     )
                             )
                             .foregroundStyle(
                                 selectedCategory == categories[index]
-                                ? .white
-                                : HomeCrewTheme.textPrimary
+                                    ? .white
+                                    : HomeCrewTheme.textPrimary
                             )
                             .onTapGesture {
                                 selectedCategory = categories[index]
@@ -73,18 +78,18 @@ struct AddTodoView: View {
                     }
                 }
             }
-            
+
             VStack(alignment: .leading, spacing: 10) {
                 Text("Day")
                     .font(.headline)
                     .foregroundStyle(HomeCrewTheme.textPrimary)
-                
+
                 HStack {
                     ForEach(days.indices, id: \.self) { index in
                         VStack {
                             Text(days[index])
                                 .font(.subheadline.bold())
-                            
+
                             Text(currentWeek[index].formatted(.dateTime.day()))
                                 .font(.title3.bold())
                         }
@@ -94,14 +99,14 @@ struct AddTodoView: View {
                             RoundedRectangle(cornerRadius: 12)
                                 .foregroundStyle(
                                     selectedDay == index
-                                    ? HomeCrewTheme.primaryPurple
-                                    : HomeCrewTheme.cardBackground
+                                        ? HomeCrewTheme.primaryPurple
+                                        : HomeCrewTheme.cardBackground
                                 )
                         )
                         .foregroundStyle(
                             selectedDay == index
-                            ? .white
-                            : HomeCrewTheme.textPrimary
+                                ? .white
+                                : HomeCrewTheme.textPrimary
                         )
                         .onTapGesture {
                             selectedDay = index
@@ -109,32 +114,36 @@ struct AddTodoView: View {
                     }
                 }
             }
-            
+
             HStack(spacing: 16) {
-                
+
                 VStack(alignment: .leading) {
                     Text("Time")
                         .font(.headline)
                         .foregroundStyle(HomeCrewTheme.textPrimary)
-                    
+
                     HStack {
                         Image(systemName: "clock")
                             .foregroundStyle(HomeCrewTheme.textSecondary)
-                        
-                        DatePicker("", selection: $selectedTime, displayedComponents: .hourAndMinute)
-                            .labelsHidden()
-                            .tint(HomeCrewTheme.primaryPurple)
+
+                        DatePicker(
+                            "",
+                            selection: $selectedTime,
+                            displayedComponents: .hourAndMinute
+                        )
+                        .labelsHidden()
+                        .tint(HomeCrewTheme.primaryPurple)
                     }
                     .padding()
                     .background(HomeCrewTheme.cardBackground)
                     .cornerRadius(12)
                 }
-                
+
                 VStack(alignment: .leading) {
                     Text("Duration")
                         .font(.headline)
                         .foregroundStyle(HomeCrewTheme.textPrimary)
-                    
+
                     HStack(spacing: 10) {
                         Button {
                             timeDuration = max(0, timeDuration - 5)
@@ -146,10 +155,10 @@ struct AddTodoView: View {
                                 .clipShape(RoundedRectangle(cornerRadius: 8))
                         }
                         .disabled(timeDuration == 0)
-                        
+
                         Text("\(timeDuration) min")
                             .foregroundStyle(HomeCrewTheme.textPrimary)
-                        
+
                         Button {
                             timeDuration += 5
                         } label: {
@@ -165,18 +174,18 @@ struct AddTodoView: View {
                     .cornerRadius(12)
                 }
             }
-            
+
             VStack(alignment: .leading, spacing: 10) {
                 Text("Repeat")
                     .font(.headline)
                     .foregroundStyle(HomeCrewTheme.textPrimary)
-                
+
                 LazyVGrid(
                     columns: [GridItem(.adaptive(minimum: 120), spacing: 8)],
                     spacing: 8
                 ) {
                     ForEach(repeatChoice, id: \.self) { option in
-                        
+
                         Text(option)
                             .padding(.vertical, 8)
                             .padding(.horizontal, 12)
@@ -185,14 +194,14 @@ struct AddTodoView: View {
                                 RoundedRectangle(cornerRadius: 10)
                                     .foregroundStyle(
                                         selectedRepeat == option
-                                        ? HomeCrewTheme.darkBlue
-                                        : HomeCrewTheme.cardBackground
+                                            ? HomeCrewTheme.darkBlue
+                                            : HomeCrewTheme.cardBackground
                                     )
                             )
                             .foregroundStyle(
                                 selectedRepeat == option
-                                ? .white
-                                : HomeCrewTheme.textPrimary
+                                    ? .white
+                                    : HomeCrewTheme.textPrimary
                             )
                             .onTapGesture {
                                 selectedRepeat = option
@@ -200,9 +209,9 @@ struct AddTodoView: View {
                     }
                 }
             }
-            
+
             Spacer()
-            
+
             Button {
                 // Add task action
             } label: {
@@ -212,7 +221,12 @@ struct AddTodoView: View {
                     .background(HomeCrewTheme.darkBlue)
                     .foregroundStyle(.white)
                     .cornerRadius(12)
-                    .shadow(color: HomeCrewTheme.darkBlue.opacity(0.2), radius: 8, x: 0, y: 4)
+                    .shadow(
+                        color: HomeCrewTheme.darkBlue.opacity(0.2),
+                        radius: 8,
+                        x: 0,
+                        y: 4
+                    )
             }
         }
         .padding()

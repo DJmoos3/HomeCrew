@@ -25,35 +25,37 @@ struct ChatView: View {
         NavigationStack {
 
             ScrollView {
-            //Vertical layout for all parts
+                //Vertical layout for all parts
                 VStack(spacing: 16) {
 
-                //Header
+                    //Header
                     VStack(spacing: 10) {
-                      //Decorative Icon Container
+                        //Decorative Icon Container
                         ZStack {
-                        //Background Circle
+                            //Background Circle
                             Circle()
                                 .fill(HomeCrewTheme.primaryPurple.opacity(0.12))
                                 .frame(width: 110, height: 110)
-                        //Chat icon
+                            //Chat icon
                             Image(systemName: "message.fill")
                                 .font(.system(size: 46))
                                 .foregroundStyle(HomeCrewTheme.primaryPurple)
-                        //Second Icon Over-lay
-                            Image(systemName: "bubble.left.and.bubble.right.fill")
-                                .font(.system(size: 24))
-                                .foregroundStyle(HomeCrewTheme.mintGreen)
-                                .offset(x: 34, y: 34)
+                            //Second Icon Over-lay
+                            Image(
+                                systemName: "bubble.left.and.bubble.right.fill"
+                            )
+                            .font(.system(size: 24))
+                            .foregroundStyle(HomeCrewTheme.mintGreen)
+                            .offset(x: 34, y: 34)
                         }
-                      //Subtext
+                        //Subtext
                         Text("Stay connected with your household")
                             .font(.subheadline)
                             .foregroundStyle(HomeCrewTheme.textSecondary)
                     }
                     .padding(.top, 20)
 
-                //Section title
+                    //Section title
                     HStack {
                         Text("Chats")
                             .font(.headline)
@@ -63,33 +65,43 @@ struct ChatView: View {
                         Spacer()
                     }
 
-                 //Chat Room cards
+                    //Chat Room cards
                     ForEach(chatRooms) { chatRoom in
 
                         NavigationLink {
                             ChatRoomView(chatRoom: chatRoom)
                         } label: {
-                          //Card layout
+                            //Card layout
                             HStack(spacing: 18) {
-                            //Profile Icon
+                                //Profile Icon
                                 Circle()
-                                    .fill(HomeCrewTheme.primaryPurple.opacity(0.15))
+                                    .fill(
+                                        HomeCrewTheme.primaryPurple.opacity(
+                                            0.15
+                                        )
+                                    )
                                     .frame(width: 54, height: 54)
                                     .overlay(
                                         //Icon inside circle
                                         Image(systemName: "person.2.fill")
-                                            .foregroundStyle(HomeCrewTheme.primaryPurple)
+                                            .foregroundStyle(
+                                                HomeCrewTheme.primaryPurple
+                                            )
                                     )
 
                                 VStack(alignment: .leading, spacing: 4) {
 
                                     Text(chatRoom.name)
                                         .font(.headline)
-                                        .foregroundStyle(HomeCrewTheme.textPrimary)
+                                        .foregroundStyle(
+                                            HomeCrewTheme.textPrimary
+                                        )
 
                                     Text("Open conversation")
                                         .font(.subheadline)
-                                        .foregroundStyle(HomeCrewTheme.textSecondary)
+                                        .foregroundStyle(
+                                            HomeCrewTheme.textSecondary
+                                        )
                                 }
 
                                 Spacer()

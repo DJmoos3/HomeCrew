@@ -10,27 +10,22 @@ import SwiftUI
 //Member Row
 
 struct MemberRow: View {
-    
+
     let member: Member
-    
+
     var body: some View {
         HStack(spacing: 15) {
-            
             Image(systemName: "person.crop.circle.fill")
                 .font(.title2)
                 .foregroundStyle(HomeCrewTheme.primaryPurple)
-            
             VStack(alignment: .leading, spacing: 4) {
-                
                 Text(member.name)
                     .fontWeight(.medium)
                     .foregroundStyle(HomeCrewTheme.textPrimary)
-                
                 Text(member.role)
                     .font(.subheadline)
                     .foregroundStyle(HomeCrewTheme.textSecondary)
             }
-            
             Spacer()
         }
         .padding()
@@ -43,19 +38,17 @@ struct MemberRow: View {
 //Profile View
 
 struct ProfileView: View {
-    
+
     //ViewModel
-    @State private var viewModel = ProfileViewModel()
-    
+    @State private var profileViewModel = ProfileViewModel()
+    @Environment(AuthViewModel.self) private var authViewModel
+
     var body: some View {
-        
         NavigationView {
-            
             VStack(spacing: 0) {
-                
+
                 //Top Bar
                 HStack {
-                    
                     NavigationLink {
                         EditProfileView()
                     } label: {
@@ -63,40 +56,37 @@ struct ProfileView: View {
                             .fontWeight(.semibold)
                             .foregroundStyle(HomeCrewTheme.primaryPurple)
                     }
-                    
                     Spacer()
-                    
                     Button("Logout") {
-                        
                     }
                     .fontWeight(.semibold)
                     .foregroundStyle(HomeCrewTheme.darkBlue)
                 }
                 .padding(.horizontal)
                 .padding(.top)
-                
+
                 //Main Content
                 ScrollView {
-                    
                     VStack(alignment: .leading, spacing: 24) {
-                        
+
                         //Title
                         Text("Profile")
                             .font(.largeTitle)
                             .fontWeight(.bold)
                             .foregroundStyle(HomeCrewTheme.textPrimary)
-                        
+
                         //Profile Section
                         HStack(alignment: .center, spacing: 20) {
-                            
                             ZStack(alignment: .bottomTrailing) {
-                                
                                 Image(systemName: "person.crop.circle")
                                     .resizable()
                                     .scaledToFit()
                                     .frame(width: 90, height: 90)
-                                    .foregroundStyle(HomeCrewTheme.primaryPurple.opacity(0.75))
-                                
+                                    .foregroundStyle(
+                                        HomeCrewTheme.primaryPurple.opacity(
+                                            0.75
+                                        )
+                                    )
                                 Button(action: {
                                     //Change profile image
                                 }) {
@@ -107,91 +97,100 @@ struct ProfileView: View {
                                         .clipShape(Circle())
                                 }
                             }
-                            
+
                             VStack(alignment: .leading, spacing: 5) {
-                                
                                 Text(
-                                    viewModel.username.isEmpty
-                                    ? "No username"
-                                    : viewModel.username
+                                    authViewModel.currentUser?.username
+                                        ?? "No username"
                                 )
                                 .font(.headline)
                                 .foregroundStyle(HomeCrewTheme.textPrimary)
-                                
                                 Text(
-                                    viewModel.fullName.isEmpty
-                                    ? "No name set"
-                                    : viewModel.fullName
+                                    profileViewModel.fullName.isEmpty
+                                        ? "No name set"
+                                        : profileViewModel.fullName
                                 )
                                 .foregroundStyle(HomeCrewTheme.textSecondary)
-                                
+
                                 Text(
-                                    viewModel.email.isEmpty
-                                    ? "No email set"
-                                    : viewModel.email
+                                    authViewModel.currentUser?.email
+                                        ?? "No email set"
                                 )
                                 .font(.subheadline)
-                                .foregroundStyle(HomeCrewTheme.textSecondary)
+                                .foregroundColor(HomeCrewTheme.textSecondary)
                             }
-                            
                             Spacer()
                         }
-                        
+
                         //Household Section
                         VStack(alignment: .leading, spacing: 15) {
-                            
+
                             Text("Household")
                                 .font(.headline)
                                 .foregroundStyle(HomeCrewTheme.textPrimary)
-                            
+
                             Text("No household yet")
                                 .foregroundStyle(HomeCrewTheme.textPrimary)
                                 .frame(maxWidth: .infinity, alignment: .leading)
                                 .padding()
                                 .background(HomeCrewTheme.cardBackground)
-                                .clipShape(RoundedRectangle(cornerRadius: HomeCrewTheme.cornerRadius))
-                            
+                                .clipShape(
+                                    RoundedRectangle(
+                                        cornerRadius: HomeCrewTheme.cornerRadius
+                                    )
+                                )
+
                             Button(action: {
                                 //Create or join household
                             }) {
                                 Text("Create / Join Household")
                                     .fontWeight(.semibold)
-                                    .foregroundStyle(HomeCrewTheme.primaryPurple)
+                                    .foregroundStyle(
+                                        HomeCrewTheme.primaryPurple
+                                    )
                                     .frame(maxWidth: .infinity)
                             }
                         }
-                        
+
                         //Member Section
                         VStack(alignment: .leading, spacing: 12) {
-                            
                             Text("Members")
                                 .font(.headline)
                                 .foregroundStyle(HomeCrewTheme.textPrimary)
-                            
+
                             // Empty State
-                            if viewModel.members.isEmpty {
-                                
+                            if profileViewModel.members.isEmpty {
                                 Text("No members yet. Invite someone!")
-                                    .foregroundStyle(HomeCrewTheme.textSecondary)
+                                    .foregroundStyle(
+                                        HomeCrewTheme.textSecondary
+                                    )
                                     .padding()
-                                    .frame(maxWidth: .infinity, alignment: .leading)
+                                    .frame(
+                                        maxWidth: .infinity,
+                                        alignment: .leading
+                                    )
                                     .background(HomeCrewTheme.cardBackground)
-                                    .clipShape(RoundedRectangle(cornerRadius: HomeCrewTheme.cornerRadius))
-                                
+                                    .clipShape(
+                                        RoundedRectangle(
+                                            cornerRadius: HomeCrewTheme
+                                                .cornerRadius
+                                        )
+                                    )
                             } else {
-                                
-                                ForEach(viewModel.members) { member in
+                                ForEach(profileViewModel.members) { member in
                                     MemberRow(member: member)
                                 }
                             }
-                            
+
                             // Invite Button
                             Button(action: {
-                                viewModel.addTestMember()
+                                profileViewModel.addTestMember()
                             }) {
                                 Text("Invite Members")
                                     .fontWeight(.semibold)
-                                    .foregroundStyle(HomeCrewTheme.primaryPurple)
+                                    .foregroundStyle(
+                                        HomeCrewTheme.primaryPurple
+                                    )
                                     .frame(maxWidth: .infinity)
                                     .padding(.top, 5)
                             }
@@ -199,7 +198,6 @@ struct ProfileView: View {
                     }
                     .padding()
                 }
-                
                 Spacer()
             }
             .background(HomeCrewTheme.background)

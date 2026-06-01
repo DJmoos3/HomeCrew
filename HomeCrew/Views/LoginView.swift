@@ -8,23 +8,26 @@
 import SwiftUI
 
 struct LoginView: View {
-    
-    @EnvironmentObject var viewModel: AuthViewModel
-    
+
+    @Environment(AuthViewModel.self) private var viewModel
+
     private enum Field {
         case email
         case password
     }
-    
+
     @FocusState private var focusedField: Field?
-    
+
     var body: some View {
+
+        @Bindable var viewModel = viewModel
+
         ScrollViewReader { proxy in
             ScrollView {
                 VStack(spacing: focusedField == nil ? 24 : 12) {
-                    
+
                     Spacer(minLength: focusedField == nil ? 70 : 10)
-                    
+
                     // Logo
                     VStack(spacing: 8) {
                         Image("HomeCrewLogo")
@@ -34,7 +37,7 @@ struct LoginView: View {
                                 width: focusedField == nil ? 200 : 70,
                                 height: focusedField == nil ? 200 : 70
                             )
-                        
+
                         if focusedField == nil {
                             Text("Sign in to manage your household")
                                 .font(.subheadline)
@@ -42,7 +45,7 @@ struct LoginView: View {
                         }
                     }
                     .padding(.bottom, focusedField == nil ? 16 : 4)
-                    
+
                     // Input fields
                     VStack(spacing: 14) {
                         TextField("Email...", text: $viewModel.email)
@@ -57,8 +60,12 @@ struct LoginView: View {
                             .padding()
                             .background(HomeCrewTheme.cardBackground)
                             .foregroundStyle(HomeCrewTheme.textPrimary)
-                            .clipShape(RoundedRectangle(cornerRadius: HomeCrewTheme.cornerRadius))
-                        
+                            .clipShape(
+                                RoundedRectangle(
+                                    cornerRadius: HomeCrewTheme.cornerRadius
+                                )
+                            )
+
                         SecureField("Password...", text: $viewModel.password)
                             .submitLabel(.done)
                             .focused($focusedField, equals: .password)
@@ -68,9 +75,13 @@ struct LoginView: View {
                             .padding()
                             .background(HomeCrewTheme.cardBackground)
                             .foregroundStyle(HomeCrewTheme.textPrimary)
-                            .clipShape(RoundedRectangle(cornerRadius: HomeCrewTheme.cornerRadius))
+                            .clipShape(
+                                RoundedRectangle(
+                                    cornerRadius: HomeCrewTheme.cornerRadius
+                                )
+                            )
                     }
-                    
+
                     // Buttons
                     HStack(spacing: 12) {
                         Button {
@@ -84,34 +95,41 @@ struct LoginView: View {
                                 .background(HomeCrewTheme.primaryPurple)
                                 .clipShape(RoundedRectangle(cornerRadius: 30))
                         }
-                        .navigationDestination(isPresented: $viewModel.isSignedIn) {
+                        .navigationDestination(
+                            isPresented: $viewModel.isSignedIn
+                        ) {
                             ContentView()
-                                .environmentObject(viewModel)
+                                .environment(viewModel)
                         }
-                        .alert("Error", isPresented: Binding(
-                            get: { viewModel.errorMessage != nil },
-                            set: { if !$0 { viewModel.errorMessage = nil } }
-                        )) {
-                            Button("OK", role: .cancel) { }
+                        .alert(
+                            "Error",
+                            isPresented: Binding(
+                                get: { viewModel.errorMessage != nil },
+                                set: { if !$0 { viewModel.errorMessage = nil } }
+                            )
+                        ) {
+                            Button("OK", role: .cancel) {}
                         } message: {
                             Text(viewModel.errorMessage ?? "")
                         }
-                        
+
                         NavigationLink {
                             RegisterView()
-                                .environmentObject(viewModel)
+                                .environment(viewModel)
                         } label: {
                             Text("Sign Up")
                                 .font(.headline)
                                 .foregroundStyle(HomeCrewTheme.primaryPurple)
                                 .frame(height: 50)
                                 .frame(maxWidth: .infinity)
-                                .background(HomeCrewTheme.primaryPurple.opacity(0.12))
+                                .background(
+                                    HomeCrewTheme.primaryPurple.opacity(0.12)
+                                )
                                 .clipShape(RoundedRectangle(cornerRadius: 30))
                         }
                     }
                     .id("buttons")
-                    
+
                     Spacer(minLength: focusedField == nil ? 70 : 20)
                 }
                 .padding()
@@ -139,6 +157,6 @@ struct LoginView: View {
 #Preview {
     NavigationStack {
         LoginView()
-            .environmentObject(AuthViewModel())
+            .environment(AuthViewModel())
     }
 }

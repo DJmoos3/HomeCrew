@@ -89,6 +89,7 @@ struct MessageCell: View {
                     
                 
             }
+            
             Text(message.text)
                 .padding(12)
                 .background(message.isMe ? HomeCrewTheme.primaryPurple
@@ -101,12 +102,10 @@ struct MessageCell: View {
                     maxWidth: 260,
                     alignment: message.isMe ? .trailing : .leading
                 )
-            
 
             if !message.isMe {
                 Spacer()
             }
-
         }
     }
 }
