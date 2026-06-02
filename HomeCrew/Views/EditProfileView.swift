@@ -10,10 +10,14 @@ import SwiftUI
 struct EditProfileView: View {
 
     // Temporary data for the profile design
-    @State private var fullName = "Anders Anderson"
-    @State private var householdName = "The Andersons"
+    @AppStorage("profileFullName") private var fullName = "Omar Qasoma"
+    @State private var householdName = "Qasoma's House"
     @AppStorage("darkModeEnabled") private var darkMode = false
     @AppStorage("taskReminderEnabled") private var taskReminder = true
+    
+    @State private var editedFullName = ""
+    @State private var showNameEditor = false
+    @State private var showSaveAlert = false
 
     var body: some View {
 
@@ -24,13 +28,19 @@ struct EditProfileView: View {
 
                 sectionTitle("Profile Information")
 
-                profileRow(
-                    icon: "person.fill",
-                    iconColor: HomeCrewTheme.primaryPurple,
-                    title: "Full Name",
-                    subtitle: fullName,
-                    showEditIcon: true
-                )
+                Button {
+                    editedFullName = fullName
+                    showNameEditor = true
+                } label: {
+                    profileRow(
+                        icon: "person.fill",
+                        iconColor: HomeCrewTheme.primaryPurple,
+                        title: "Full Name",
+                        subtitle: fullName,
+                        showEditIcon: true
+                    )
+                }
+                .buttonStyle(.plain)
 
                 sectionTitle("Household Settings")
 
@@ -96,11 +106,64 @@ struct EditProfileView: View {
         .toolbar {
             ToolbarItem(placement: .topBarTrailing) {
                 Button("Save") {
-                    // Save action will be added later
+                    showSaveAlert = true
                 }
                 .font(.headline)
                 .foregroundStyle(HomeCrewTheme.primaryPurple)
             }
+        }
+        .sheet(isPresented: $showNameEditor) {
+            NavigationStack {
+                VStack(spacing: 20) {
+                    TextField("Full name", text: $editedFullName)
+                        .padding()
+                        .background(HomeCrewTheme.cardBackground)
+                        .foregroundStyle(HomeCrewTheme.textPrimary)
+                        .clipShape(
+                            RoundedRectangle(
+                                cornerRadius: HomeCrewTheme.cornerRadius
+                            )
+                        )
+                        .padding(.horizontal)
+
+                    Spacer()
+                }
+                .padding(.top)
+                .background(HomeCrewTheme.background)
+                .navigationTitle("Edit Name")
+                .navigationBarTitleDisplayMode(.inline)
+                .toolbar {
+                    ToolbarItem(placement: .topBarLeading) {
+                        Button("Cancel") {
+                            editedFullName = fullName
+                            showNameEditor = false
+                        }
+                    }
+
+                    ToolbarItem(placement: .topBarTrailing) {
+                        Button("Save") {
+                            let trimmedName = editedFullName.trimmingCharacters(
+                                in: .whitespacesAndNewlines
+                            )
+
+                            if !trimmedName.isEmpty {
+                                fullName = trimmedName
+                                editedFullName = trimmedName
+                                showNameEditor = false
+                                showSaveAlert = true
+                            }
+                        }
+                    }
+                }
+            }
+        }
+        .alert("Profile updated", isPresented: $showSaveAlert) {
+            Button("OK", role: .cancel) { }
+        } message: {
+            Text("Your profile settings have been saved.")
+        }
+        .onAppear {
+            editedFullName = fullName
         }
     }
 
