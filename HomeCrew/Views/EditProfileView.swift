@@ -9,7 +9,7 @@ import SwiftUI
 
 struct EditProfileView: View {
 
-    // Dummy data for design only
+    // Temporary data for the profile design
     @State private var fullName = "Anders Anderson"
     @State private var householdName = "The Andersons"
     @AppStorage("darkModeEnabled") private var darkMode = false
@@ -60,12 +60,24 @@ struct EditProfileView: View {
 
                 sectionTitle("Preferences")
 
-                toggleRow(
-                    icon: "bell.fill",
-                    iconColor: HomeCrewTheme.darkBlue,
-                    title: "Task Reminder",
-                    isOn: $taskReminder
-                )
+                // Task reminder setting
+                VStack(alignment: .leading, spacing: 8) {
+                    toggleRow(
+                        icon: "bell.fill",
+                        iconColor: HomeCrewTheme.darkBlue,
+                        title: "Task Reminder",
+                        isOn: $taskReminder
+                    )
+
+                    Text(
+                        taskReminder
+                        ? "Reminders are enabled for your assigned tasks."
+                        : "Reminders are disabled."
+                    )
+                    .font(.caption)
+                    .foregroundStyle(HomeCrewTheme.textSecondary)
+                    .padding(.horizontal, 4)
+                }
 
                 toggleRow(
                     icon: "moon.fill",
@@ -84,7 +96,7 @@ struct EditProfileView: View {
         .toolbar {
             ToolbarItem(placement: .topBarTrailing) {
                 Button("Save") {
-                    // Dummy save action
+                    // Save action will be added later
                 }
                 .font(.headline)
                 .foregroundStyle(HomeCrewTheme.primaryPurple)
@@ -206,7 +218,7 @@ struct EditProfileView: View {
     // MARK: - Log Out Button
     private var logoutButton: some View {
         Button {
-            // Dummy logout action
+            // Logout function will be added later
         } label: {
             HStack {
                 Image(systemName: "rectangle.portrait.and.arrow.right")
