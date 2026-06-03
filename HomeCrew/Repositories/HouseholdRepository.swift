@@ -5,11 +5,11 @@
 //  Created by Isaac Strandh on 2026-05-28.
 //
 
-//import Foundation
-//import FirebaseFirestore
-//
+import Foundation
+import FirebaseFirestore
+
 //final class HouseholdRepository {
-//    private lazy var db = Firestore.firestore()
+//    private let db = Firestore.firestore()
 //    
 //    func createHousehold(name: String, authUser: AuthDataResultModel) async throws {
 //        let household = Household(name: name, memberIds: [authUser.uid], createdBy: authUser.uid)
@@ -32,8 +32,7 @@ final class HouseholdRepository {
             createdBy: userId
         )
 
-        let ref = try db.collection("households")
-            .addDocument(from: household)
+        let ref = try db.collection("households").addDocument(from: household)
 
         try await db.collection("users")
             .document(userId)
@@ -42,3 +41,5 @@ final class HouseholdRepository {
             ])
     }
 }
+
+

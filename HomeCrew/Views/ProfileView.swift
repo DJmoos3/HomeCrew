@@ -44,6 +44,7 @@ struct ProfileView: View {
     
     //ViewModel
     @State private var viewModel = ProfileViewModel()
+    @State private var householdName: String?
     
     var body: some View {
         
@@ -138,16 +139,19 @@ struct ProfileView: View {
                             
                             Text("Household")
                                 .font(.headline)
-                            
-                            Text("No household yet")
+                            //Updated the household name
+                            Text(householdName ?? "No household yet")
                                 .frame(maxWidth: .infinity, alignment: .leading)
                                 .padding()
                                 .background(Color(.systemGray6))
                                 .cornerRadius(12)
                             
-                            Button(action: {
-                                //Create or join household
-                            }) {
+                            NavigationLink{
+                                CreateHouseholdView { name in
+                                    householdName = name
+                                }
+                      
+                            } label: {
                                 Text("Create / Join Household")
                                     .fontWeight(.semibold)
                                     .foregroundColor(.blue)
@@ -161,7 +165,7 @@ struct ProfileView: View {
                             Text("Members")
                                 .font(.headline)
                             
-                            // Empty State
+                            //Empty State
                             if viewModel.members.isEmpty {
                                 
                                 Text("No members yet. Invite someone!")
@@ -178,7 +182,7 @@ struct ProfileView: View {
                                 }
                             }
                             
-                            // Invite Button
+                            //Invite Button
                             Button(action: {
                                 viewModel.addTestMember()
                             }) {
@@ -196,6 +200,11 @@ struct ProfileView: View {
                 Spacer()
             }
             .navigationBarHidden(true)
+            .onAppear {
+                Task{
+                    await viewModel.fetchUser()
+                }
+            }
         }
     }
 }

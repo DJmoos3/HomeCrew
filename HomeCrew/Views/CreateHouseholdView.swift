@@ -4,12 +4,17 @@
 //
 //  Created by Urwa Adil on 2026-06-01.
 //
+
 import SwiftUI
 
 struct CreateHouseholdView: View {
 
     @State private var viewModel = HouseholdViewModel()
     @State private var householdName: String = ""
+    
+    //Update the created household
+    var onHouseholdCreated: ((String) -> Void)?
+    
 
     var body: some View {
 
@@ -19,7 +24,7 @@ struct CreateHouseholdView: View {
 
                 VStack(spacing: 16) {
 
-                    // MARK: Header
+                    //Header
                     VStack(spacing: 10) {
 
                         ZStack {
@@ -44,7 +49,7 @@ struct CreateHouseholdView: View {
                     }
                     .padding(.top, 20)
 
-                    // MARK: Input Card
+                    //Input Card
                     VStack(alignment: .leading, spacing: 12) {
 
                         Text("Household name")
@@ -74,12 +79,13 @@ struct CreateHouseholdView: View {
                         )
                     )
 
-                    // MARK: Button
+                    //Button
                     Button {
-                        Task {
-                            await viewModel.createHousehold(name: householdName)
+                        viewModel.createHousehold(name: householdName)
+                        //Notify profile view
+                       // onHouseholdCreated?(householdName)
                         }
-                    } label: {
+                    label: {
 
                         HStack {
 
@@ -117,6 +123,14 @@ struct CreateHouseholdView: View {
             .background(HomeCrewTheme.background)
             .navigationTitle("Household")
             .navigationBarTitleDisplayMode(.inline)
+            
+            //Wait until firebase finish updating
+            .onChange(of: viewModel.didCreateHousehold) { _, created in
+                          if created {
+                              print("Household created successfully")
+                              onHouseholdCreated?(householdName)
+                          }
+                      }
         }
     }
 }

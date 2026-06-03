@@ -8,6 +8,7 @@
 import Foundation
 import Combine
 import FirebaseAuth
+import FirebaseFirestore
 
 final class AuthViewModel : ObservableObject    {
     @Published var email = ""
@@ -24,22 +25,58 @@ final class AuthViewModel : ObservableObject    {
     }
     
     
-    func signUp(){
-        guard !email.isEmpty && !password.isEmpty else{
+//    func signUp(){
+//        guard !email.isEmpty && !password.isEmpty else{
+//            print("No email or password")
+//            return
+//        }
+//        
+//        Task{
+//            do{
+//                let returnedUserData = try await AuthManager.shared.createUser(email: email, password: password)
+//                isSignedIn = true
+//                print("Success")
+//                print(returnedUserData)
+//            } catch{
+//                print("Error: \(error)")
+//            }
+//            
+//        }
+//    }
+    func signUp() {
+        guard !email.isEmpty && !password.isEmpty else {
             print("No email or password")
             return
         }
-        
-        Task{
-            do{
-                let returnedUserData = try await AuthManager.shared.createUser(email: email, password: password)
-                isSignedIn = true
+
+        Task {
+            do {
+                //Create Auth user
+                let returnedUserData = try await AuthManager.shared.createUser(
+                    email: email,
+                    password: password
+                )
+
+                let uid = returnedUserData.uid
+
+                //CREATE FIRESTORE USER DOCUMENT
+                try await Firestore.firestore()
+                    .collection("users")
+                    .document(uid)
+                    .setData([
+                        "uid": uid,
+                        "email": email,
+                        "householdId": "",
+                        "createdAt": Timestamp()
+                    ])
+
+                //Continue app flow
+                self.isSignedIn = true
                 print("Success")
-                print(returnedUserData)
-            } catch{
+
+            } catch {
                 print("Error: \(error)")
             }
-            
         }
     }
     

@@ -14,29 +14,33 @@ final class HouseholdViewModel {
 
     var isLoading: Bool = false
     var errorMessage: String? = nil
+    var didCreateHousehold = false
 
     private let repository = HouseholdRepository()
 
     func createHousehold(name: String) {
 
         errorMessage = nil
+        didCreateHousehold = false
 
         let trimmedName = name.trimmingCharacters(in: .whitespaces)
 
-        if trimmedName.isEmpty {
+        guard !trimmedName.isEmpty else {
             errorMessage = "Please enter a household name"
             return
         }
 
-        isLoading = true
-
         Task {
-            do {
-                let userId = Auth.auth().currentUser?.uid ?? ""
+            isLoading = true
 
-                if userId.isEmpty {
+            defer {
+                isLoading = false
+            }
+
+            do {
+                guard let userId = Auth.auth().currentUser?.uid,
+                      !userId.isEmpty else {
                     errorMessage = "User not logged in"
-                    isLoading = false
                     return
                 }
 
@@ -45,12 +49,11 @@ final class HouseholdViewModel {
                     userId: userId
                 )
 
+                didCreateHousehold = true
+
             } catch {
                 errorMessage = error.localizedDescription
             }
-
-            isLoading = false
         }
     }
 }
-
