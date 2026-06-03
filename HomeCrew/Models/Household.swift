@@ -3,7 +3,6 @@
 //  HomeCrew
 //
 //  Created by Isaac Strandh on 2026-05-28.
-//
 
 import Foundation
 import FirebaseFirestore
