@@ -83,7 +83,9 @@ struct CreateHouseholdView: View {
 
                     //Button
                     Button {
-                        viewModel.createHousehold(name: householdName)
+                        Task {
+                            await viewModel.createHousehold(name: householdName)
+                        }
                         //Notify profile view
                        // onHouseholdCreated?(householdName)
                         }

@@ -12,4 +12,5 @@ struct Household: Codable, Identifiable {
     var name: String
     var memberIds: [String]
     var createdBy: String
+    var createdAt: Date
 }

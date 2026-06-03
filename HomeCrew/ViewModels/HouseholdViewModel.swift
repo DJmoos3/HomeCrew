@@ -5,9 +5,9 @@
 //  Created by Urwa Adil on 2026-06-01.
 //
 
+import FirebaseFirestore
 import Foundation
 import Observation
-import FirebaseFirestore
 
 @Observable
 final class HouseholdViewModel {
@@ -15,44 +15,68 @@ final class HouseholdViewModel {
     var isLoading: Bool = false
     var errorMessage: String? = nil
     var didCreateHousehold = false
+
     var members: [Member] = []
     var householdName: String = ""
+    var inviteEmail = ""
 
-    private let repository = HouseholdRepository()
+    private let repository: HouseholdRepository
+    private let authRepository: AuthRepository
 
-    func createHousehold(name: String) {
+    init(
+        repository: HouseholdRepository = HouseholdRepository(),
+        authRepository: AuthRepository = .shared
+    ) {
+        self.repository = repository
+        self.authRepository = authRepository
+    }
 
+    func createHousehold(name: String) async {
         errorMessage = nil
         didCreateHousehold = false
 
-        let trimmedName = name.trimmingCharacters(in: .whitespaces)
+        let trimmedName = name.trimmingCharacters(in: .whitespacesAndNewlines)
 
         guard !trimmedName.isEmpty else {
             errorMessage = "Please enter a household name"
             return
         }
 
-        Task {
-            isLoading = true
-            defer { isLoading = false }
+        //        Task {
+        isLoading = true
+        defer { isLoading = false }
 
-            do {
-                let authUser = try AuthRepository.shared.getUser()
+        do {
+            let authUser = try authRepository.getUser()
+            try await repository.createHousehold(
+                name: trimmedName,
+                authUser: authUser
+            )
+            didCreateHousehold = true
 
-                try await repository.createHousehold(
-                    name: trimmedName,
-                    authUser: authUser
-                )
-
-                didCreateHousehold = true
-
-            } catch {
-                errorMessage = error.localizedDescription
-            }
+        } catch {
+            errorMessage = error.localizedDescription
         }
+        //        }
     }
-    
+
     func fetchHouseholdMembers(householdId: String) async {
+        isLoading = true
+        defer { isLoading = false }
+
+        do {
+            let household = try await repository.fetchHousehold(
+                householdId: householdId
+            )
+            householdName = household.name
+            members = try await repository.fetchMembers(
+                memberIds: household.memberIds
+            )
+        } catch {
+            errorMessage = error.localizedDescription
+        }
+
+        /*
         do {
             let snapshot = try await Firestore.firestore()
                 .collection("households")
@@ -61,7 +85,7 @@ final class HouseholdViewModel {
 
             let data = snapshot.data()
             self.householdName = data?["name"] as? String ?? ""
-            
+
             let memberIds = data?["memberIds"] as? [String] ?? []
 
             // Fetch each user's document to get their username
@@ -71,15 +95,52 @@ final class HouseholdViewModel {
                     .collection("users")
                     .document(uid)
                     .getDocument()
-                let username = userSnapshot.data()?["username"] as? String ?? "Unknown"
+                let username =
+                    userSnapshot.data()?["username"] as? String ?? "Unknown"
                 fetchedMembers.append(Member(name: username, role: "Member"))
             }
             self.members = fetchedMembers
         } catch {
             errorMessage = error.localizedDescription
         }
+
+        */
     }
-    func addTestMember() {
-        members.append(Member(name: "New Member", role: "Member"))
+
+    //    func addTestMember() {
+    //        members.append(Member(name: "New Member", role: "Member"))
+    //    }
+
+    func inviteMember(householdId: String) async {
+        let email = inviteEmail.trimmingCharacters(in: .whitespacesAndNewlines)
+
+        guard !email.isEmpty else {
+            errorMessage = "Please enter an email"
+            return
+        }
+
+        do {
+            let authUser = try authRepository.getUser()
+            try await repository.inviteMember(
+                householdId: householdId,
+                invitedEmail: email,
+                invitedByUserId: authUser.uid
+            )
+            inviteEmail = ""
+        } catch {
+            errorMessage = error.localizedDescription
+        }
+    }
+
+    func removeMember(householdId: String, userId: String) async {
+        do {
+            try await repository.removeMember(
+                householdId: householdId,
+                userId: userId
+            )
+            await fetchHouseholdMembers(householdId: householdId)
+        } catch {
+            errorMessage = error.localizedDescription
+        }
     }
 }
