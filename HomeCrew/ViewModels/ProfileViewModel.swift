@@ -38,6 +38,7 @@ final class ProfileViewModel {
 
     var members: [Member] = []
     var householdId: String? = nil
+    var householdName: String = ""
 
     func fetchUser() async {
 
@@ -74,6 +75,8 @@ final class ProfileViewModel {
                 .getDocument()
 
             let data = snapshot.data()
+            self.householdName = data?["name"] as? String ?? ""
+            
             let memberIds = data?["memberIds"] as? [String] ?? []
 
             self.members = memberIds.map {

@@ -44,7 +44,7 @@ struct ProfileView: View {
     
     //ViewModel
     @State private var viewModel = ProfileViewModel()
-    @State private var householdName: String?
+//    @State private var householdName: String?
     
     var body: some View {
         
@@ -140,16 +140,21 @@ struct ProfileView: View {
                             Text("Household")
                                 .font(.headline)
                             //Updated the household name
-                            Text(householdName ?? "No household yet")
+                            Text(
+                                viewModel.householdName.isEmpty
+                                ? "No household yet"
+                                :viewModel.householdName
+                            )
                                 .frame(maxWidth: .infinity, alignment: .leading)
                                 .padding()
                                 .background(Color(.systemGray6))
                                 .cornerRadius(12)
                             
                             NavigationLink{
-                                CreateHouseholdView { name in
-                                    householdName = name
-                                }
+                                CreateHouseholdView(profileViewModel: viewModel)
+//                                { name in
+//                                    householdName = name
+//                                }
                       
                             } label: {
                                 Text("Create / Join Household")

@@ -12,6 +12,10 @@ struct CreateHouseholdView: View {
     @State private var viewModel = HouseholdViewModel()
     @State private var householdName: String = ""
     
+     var profileViewModel: ProfileViewModel
+    
+    @Environment(\.dismiss) var dismiss
+    
     //Update the created household
     var onHouseholdCreated: ((String) -> Void)?
     
@@ -125,16 +129,22 @@ struct CreateHouseholdView: View {
             .navigationBarTitleDisplayMode(.inline)
             
             //Wait until firebase finish updating
+//            .onChange(of: viewModel.didCreateHousehold) { _, created in
+//                          if created {
+//                              print("Household created successfully")
+//                              onHouseholdCreated?(householdName)
+//                          }
+//                      }
             .onChange(of: viewModel.didCreateHousehold) { _, created in
-                          if created {
-                              print("Household created successfully")
-                              onHouseholdCreated?(householdName)
-                          }
-                      }
+                if created {
+                    profileViewModel.householdName = householdName
+                    dismiss()
+                }
+            }
         }
     }
 }
 
 #Preview {
-    CreateHouseholdView()
+    CreateHouseholdView(profileViewModel: ProfileViewModel())
 }

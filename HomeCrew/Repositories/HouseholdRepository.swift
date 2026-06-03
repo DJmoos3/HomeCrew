@@ -36,9 +36,12 @@ final class HouseholdRepository {
 
         try await db.collection("users")
             .document(userId)
-            .updateData([
+            .setData([
                 "householdId": ref.documentID
-            ])
+            ],merge:true)
+//            .updateData([
+//                "householdId": ref.documentID
+//            ])
     }
 }
 
