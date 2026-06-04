@@ -113,7 +113,7 @@ final class HouseholdViewModel {
 
     func inviteMember(householdId: String) async {
         let email = inviteEmail.trimmingCharacters(in: .whitespacesAndNewlines)
-
+        print("Email \(email)")
         guard !email.isEmpty else {
             errorMessage = "Please enter an email"
             return
@@ -142,5 +142,26 @@ final class HouseholdViewModel {
         } catch {
             errorMessage = error.localizedDescription
         }
+    }
+    
+    func addMemberDirectly(householdId: String) async {
+        let email = inviteEmail.trimmingCharacters(in: .whitespacesAndNewlines)
+
+        guard !email.isEmpty else {
+            errorMessage = "Please enter an email"
+            return
+        }
+
+        do {
+            try await repository.addMemberDirectly(
+                householdId: householdId,
+                email: email
+            )
+            inviteEmail = ""
+            await fetchHouseholdMembers(householdId: householdId)
+        } catch {
+            errorMessage = error.localizedDescription
+        }
+
     }
 }

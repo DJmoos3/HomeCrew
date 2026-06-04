@@ -63,8 +63,11 @@ final class HouseholdRepository {
             createdAt: Date()
         )
 
+        print(invite)
+        print("try start")
         try db.collection("householdInvites")
             .addDocument(from: invite)
+        print("try end")
     }
 
     func acceptInvite(
@@ -105,6 +108,37 @@ final class HouseholdRepository {
             .document(userId)
             .updateData([
                 "householdId": FieldValue.delete()
+            ])
+    }
+    
+    func addMemberDirectly(
+        householdId: String,
+        email: String
+    ) async throws {
+        let normalizedEmail = email
+            .trimmingCharacters(in: .whitespacesAndNewlines)
+            .lowercased()
+        let snapshot = try await db.collection("users")
+            .whereField("email", isEqualTo: normalizedEmail)
+            .limit(to: 1)
+            .getDocuments()
+
+        guard let userDocument = snapshot.documents.first else {
+            throw URLError(.cannotFindHost)
+        }
+
+        let userId = userDocument.documentID
+
+        try await db.collection("households")
+            .document(householdId)
+            .updateData([
+                "memberIds": FieldValue.arrayUnion([userId])
+            ])
+
+        try await db.collection("users")
+            .document(userId)
+            .updateData([
+                "householdId": householdId
             ])
     }
 }
