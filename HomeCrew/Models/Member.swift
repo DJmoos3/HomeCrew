@@ -8,7 +8,8 @@
 import Foundation
 
 struct Member: Identifiable {
-    let id = UUID()
+    let id: String
     let name: String
+    let email: String
     let role: String
 }
