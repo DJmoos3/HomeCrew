@@ -76,11 +76,10 @@ final class ProfileViewModel {
 
             let data = snapshot.data()
             self.householdName = data?["name"] as? String ?? ""
-            
             let memberIds = data?["memberIds"] as? [String] ?? []
 
             self.members = memberIds.map {
-                Member(name: $0, role: "Member")
+                Member(id: <#String#>, name: $0, role: "Member")
             }
 
         } catch {
@@ -89,6 +88,6 @@ final class ProfileViewModel {
     }
 
     func addTestMember() {
-        members.append(Member(name: "New Member", role: "Member"))
+        members.append(Member(id: <#String#>, name: "New Member", role: "Member"))
     }
 }

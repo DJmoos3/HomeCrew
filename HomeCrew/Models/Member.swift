@@ -7,8 +7,8 @@
 
 import Foundation
 
-struct Member: Identifiable {
-    let id = UUID()
-    let name: String
-    let role: String
+struct Member: Codable, Identifiable {
+    var id: String
+    var name: String
+    var role: String
 }
