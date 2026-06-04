@@ -7,24 +7,13 @@
 
 import SwiftUI
 
-struct Message: Identifiable {
-    let id = UUID()
-    let text: String
-    let isMe: Bool
-}
-
 struct ChatRoomView: View {
 
     let chatRoom: ChatRoom
 
     @State private var messageText = ""
 
-    @State var messages = [
-        Message(text: "Hej!", isMe: true),
-        Message(text: "Glöm inte att städa ditt rum", isMe: true),
-        Message(text: "Okej", isMe: false),
-        Message(text: "Tack!", isMe: true),
-    ]
+    @State var messages: [Message] = []
 
     var body: some View {
         VStack {
@@ -53,7 +42,7 @@ struct ChatRoomView: View {
                                            )
                    // .textFieldStyle(.roundedBorder)
                 Button {
-                    messages.append(Message(text: messageText, isMe: true))
+                    //messages.append(Message(text: messageText, isMe: true))
                     messageText = ""
                 } label: {
                     Image(systemName: "paperplane.fill")
