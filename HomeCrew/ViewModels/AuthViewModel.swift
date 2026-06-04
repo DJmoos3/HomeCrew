@@ -99,6 +99,17 @@ final class AuthViewModel {
         }
     }
 
+    func signOut() {
+        do {
+            try AuthRepository.shared.signOut()
+            isSignedIn = false
+            currentUser = nil
+            clearFields()
+        } catch {
+            errorMessage = error.localizedDescription
+        }
+    }
+
     func fetchCurrentUser() async {
         guard let uid = Auth.auth().currentUser?.uid else { return }
         do {
