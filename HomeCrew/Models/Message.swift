@@ -13,9 +13,4 @@ struct Message: Codable, Identifiable {
     var text: String
     var senderId: String
     var createdAt: Date
-    
-    // TODO: Remove
-    var isMe: Bool {
-        true
-    }
 }
