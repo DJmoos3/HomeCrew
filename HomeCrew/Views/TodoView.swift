@@ -31,7 +31,6 @@ struct TodoView: View {
     }
     
     var body: some View {
-        NavigationStack {
             VStack {
                 HStack {
                     VStack(alignment: .leading) {
@@ -172,7 +171,6 @@ struct TodoView: View {
                 }
             }
             .background(HomeCrewTheme.background)
-        }
     }
 }
 
