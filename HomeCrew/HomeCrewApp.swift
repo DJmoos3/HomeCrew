@@ -33,11 +33,22 @@ struct HomeCrewApp: App {
     
     var body: some Scene {
         WindowGroup {
-            NavigationStack {
-                LoginView()
-                    .environment(authViewModel)
+            Group {
+                if authViewModel.isSignedIn {
+                    NavigationStack {
+                        ContentView()
+                    }
+                } else {
+                    NavigationStack {
+                        LoginView()
+                    }
+                }
             }
+            .environment(authViewModel)
             .preferredColorScheme(darkMode ? .dark : .light)
+            .onAppear {
+                authViewModel.checkExistingSession()
+            }
         }
     }
 }

@@ -26,10 +26,23 @@ final class AuthViewModel {
         self.userRepository = UserRepository()
     }
 
+    func checkExistingSession() {
+        let hasLaunchedBefore = UserDefaults.standard.bool(forKey: "hasLaunchedBefore")
+        if !hasLaunchedBefore {
+            try? Auth.auth().signOut()
+            UserDefaults.standard.set(true, forKey: "hasLaunchedBefore")
+            return
+        }
+
+        if Auth.auth().currentUser != nil {
+            isSignedIn = true
+            Task { await fetchCurrentUser() }
+        }
+    }
+
     func clearFields() {
         email = ""
         password = ""
-        isSignedIn = false
         errorMessage = nil
     }
 
