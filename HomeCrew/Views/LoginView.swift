@@ -95,7 +95,7 @@ struct LoginView: View {
                                 .background(HomeCrewTheme.primaryPurple)
                                 .clipShape(RoundedRectangle(cornerRadius: 30))
                         }
-git                         .alert(
+                        .alert(
                             "Error",
                             isPresented: Binding(
                                 get: { viewModel.errorMessage != nil },
