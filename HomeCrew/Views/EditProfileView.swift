@@ -10,7 +10,8 @@ import SwiftUI
 struct EditProfileView: View {
 
     // Temporary data for the profile design
-    @AppStorage("profileFullName") private var fullName = "Omar Qasoma"
+    @Environment(AuthViewModel.self) private var authViewModel
+    
     @State private var householdName = "Qasoma's House"
     @AppStorage("darkModeEnabled") private var darkMode = false
     @AppStorage("taskReminderEnabled") private var taskReminder = true
@@ -18,6 +19,10 @@ struct EditProfileView: View {
     @State private var editedFullName = ""
     @State private var showNameEditor = false
     @State private var showSaveAlert = false
+
+    private var displayName: String {
+        authViewModel.currentUser?.username ?? "No name set"
+    }
 
     var body: some View {
 
@@ -29,14 +34,14 @@ struct EditProfileView: View {
                 sectionTitle("Profile Information")
 
                 Button {
-                    editedFullName = fullName
+                    editedFullName = displayName
                     showNameEditor = true
                 } label: {
                     profileRow(
                         icon: "person.fill",
                         iconColor: HomeCrewTheme.primaryPurple,
                         title: "Full Name",
-                        subtitle: fullName,
+                        subtitle: displayName,
                         showEditIcon: true
                     )
                 }
@@ -135,20 +140,16 @@ struct EditProfileView: View {
                 .toolbar {
                     ToolbarItem(placement: .topBarLeading) {
                         Button("Cancel") {
-                            editedFullName = fullName
+                            editedFullName = displayName
                             showNameEditor = false
                         }
                     }
 
                     ToolbarItem(placement: .topBarTrailing) {
                         Button("Save") {
-                            let trimmedName = editedFullName.trimmingCharacters(
-                                in: .whitespacesAndNewlines
-                            )
-
-                            if !trimmedName.isEmpty {
-                                fullName = trimmedName
-                                editedFullName = trimmedName
+                            Task {
+                                await authViewModel.updateUsername(editedFullName)
+                                editedFullName = displayName
                                 showNameEditor = false
                                 showSaveAlert = true
                             }
@@ -163,7 +164,7 @@ struct EditProfileView: View {
             Text("Your profile settings have been saved.")
         }
         .onAppear {
-            editedFullName = fullName
+            editedFullName = displayName
         }
     }
 
@@ -309,5 +310,6 @@ struct EditProfileView: View {
 #Preview {
     NavigationStack {
         EditProfileView()
+            .environment(AuthViewModel())
     }
 }
