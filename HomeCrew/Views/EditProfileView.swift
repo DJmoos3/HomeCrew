@@ -12,8 +12,17 @@ struct EditProfileView: View {
     // Temporary data for the profile design
     @State private var fullName = "Anders Anderson"
     @State private var householdName = "The Andersons"
+    @Environment(AuthViewModel.self) private var authViewModel
     @AppStorage("darkModeEnabled") private var darkMode = false
     @AppStorage("taskReminderEnabled") private var taskReminder = true
+    
+    @State private var editedFullName = ""
+    @State private var showNameEditor = false
+    @State private var showSaveAlert = false
+
+    private var displayName: String {
+        authViewModel.currentUser?.username ?? "No name set"
+    }
 
     var body: some View {
 
@@ -24,13 +33,19 @@ struct EditProfileView: View {
 
                 sectionTitle("Profile Information")
 
-                profileRow(
-                    icon: "person.fill",
-                    iconColor: HomeCrewTheme.primaryPurple,
-                    title: "Full Name",
-                    subtitle: fullName,
-                    showEditIcon: true
-                )
+                Button {
+                    editedFullName = displayName
+                    showNameEditor = true
+                } label: {
+                    profileRow(
+                        icon: "person.fill",
+                        iconColor: HomeCrewTheme.primaryPurple,
+                        title: "Full Name",
+                        subtitle: displayName,
+                        showEditIcon: true
+                    )
+                }
+                .buttonStyle(.plain)
 
                 sectionTitle("Household Settings")
 
@@ -96,11 +111,61 @@ struct EditProfileView: View {
         .toolbar {
             ToolbarItem(placement: .topBarTrailing) {
                 Button("Save") {
-                    // Save action will be added later
+                  
+                    showSaveAlert = true
                 }
                 .font(.headline)
                 .foregroundStyle(HomeCrewTheme.primaryPurple)
             }
+        }
+        .sheet(isPresented: $showNameEditor) {
+            NavigationStack {
+                VStack(spacing: 20) {
+                    TextField("Full name", text: $editedFullName)
+                        .padding()
+                        .background(HomeCrewTheme.cardBackground)
+                        .foregroundStyle(HomeCrewTheme.textPrimary)
+                        .clipShape(
+                            RoundedRectangle(
+                                cornerRadius: HomeCrewTheme.cornerRadius
+                            )
+                        )
+                        .padding(.horizontal)
+
+                    Spacer()
+                }
+                .padding(.top)
+                .background(HomeCrewTheme.background)
+                .navigationTitle("Edit Name")
+                .navigationBarTitleDisplayMode(.inline)
+                .toolbar {
+                    ToolbarItem(placement: .topBarLeading) {
+                        Button("Cancel") {
+                            editedFullName = displayName
+                            showNameEditor = false
+                        }
+                    }
+
+                    ToolbarItem(placement: .topBarTrailing) {
+                        Button("Save") {
+                            Task {
+                                await authViewModel.updateUsername(editedFullName)
+                                editedFullName = displayName
+                                showNameEditor = false
+                                showSaveAlert = true
+                            }
+                        }
+                    }
+                }
+            }
+        }
+        .alert("Profile updated", isPresented: $showSaveAlert) {
+            Button("OK", role: .cancel) { }
+        } message: {
+            Text("Your profile settings have been saved.")
+        }
+        .onAppear {
+            editedFullName = displayName
         }
     }
 
@@ -246,5 +311,6 @@ struct EditProfileView: View {
 #Preview {
     NavigationStack {
         EditProfileView()
+            .environment(AuthViewModel())
     }
 }
