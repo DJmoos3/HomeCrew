@@ -4,7 +4,6 @@
 //
 //  Created by Isaac Strandh on 2026-05-18.
 //
-
 import FirebaseAuth
 import Foundation
 import Observation
@@ -37,7 +36,6 @@ final class AuthViewModel {
     func signUp() async {
         guard !email.isEmpty && !password.isEmpty, !username.isEmpty else {
             errorMessage = "Please enter email, username and password"
-            print("Please enter email, username and password")
             return
         }
 
@@ -53,24 +51,19 @@ final class AuthViewModel {
             password = ""
             await fetchCurrentUser()
             print("Success")
-            print(returnedUserData)
         } catch {
             isSignedIn = false
             password = ""
             errorMessage = error.localizedDescription
             print("Error: \(error)")
         }
-
     }
 
     func signIn() {
         errorMessage = nil
         Task {
             do {
-                try await AuthRepository.shared.signIn(
-                    email: email,
-                    password: password
-                )
+                try await AuthRepository.shared.signIn(email: email, password: password)
                 isSignedIn = true
                 await fetchCurrentUser()
             } catch let error as NSError {
@@ -85,24 +78,21 @@ final class AuthViewModel {
                 case .invalidEmail:
                     errorMessage = "Invalid email address"
                 case .invalidCredential:
-                    errorMessage =
-                        "No account found with that email or incorrect password"
+                    errorMessage = "No account found with that email or incorrect password"
                 default:
                     errorMessage = error.localizedDescription
                 }
             }
         }
     }
-    func fetchCurrentUser() async{
+
+    func fetchCurrentUser() async {
         guard let uid = Auth.auth().currentUser?.uid else { return }
-        
-        Task {
-            do {
-                let snapshot = try await Firestore.firestore().collection("users").document(uid).getDocument()
-                currentUser = try snapshot.data(as: AppUser.self)
-            } catch {
-                print("Error fetching user: \(error)")
-            }
+        do {
+            let snapshot = try await Firestore.firestore().collection("users").document(uid).getDocument()
+            currentUser = try snapshot.data(as: AppUser.self)
+        } catch {
+            print("Error fetching user: \(error)")
         }
     }
     
