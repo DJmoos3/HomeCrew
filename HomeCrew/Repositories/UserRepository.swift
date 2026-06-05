@@ -17,4 +17,15 @@ final class UserRepository {
         try db.collection("users").document(authUser.uid).setData(from: appUser)
         
     }
+    // Update username in Firestore (omar)
+    
+    func updateUsername(uid: String, username: String) async throws {
+
+            try await db.collection("users").document(uid).updateData([
+
+                "username": username
+
+            ])
+
+        }
 }
