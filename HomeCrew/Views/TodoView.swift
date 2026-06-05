@@ -60,6 +60,7 @@ struct TodoView: View {
                     HStack(spacing: 16) {
                         NavigationLink {
                             ChatView()
+                                .environment(authViewModel)
                         } label: {
                             Image(systemName: "bubble.right")
                                 .font(.system(size: 25))

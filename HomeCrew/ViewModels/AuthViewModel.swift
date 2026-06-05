@@ -119,4 +119,28 @@ final class AuthViewModel {
             print("Error fetching user: \(error)")
         }
     }
+    
+    // Update username in Firestore (omar)
+    func updateUsername(_ newUsername: String) async {
+        guard let uid = currentUser?.id else {
+            errorMessage = "Could not find current user"
+            return
+        }
+        
+        let trimmedUsername = newUsername.trimmingCharacters(in: .whitespacesAndNewlines)
+        
+        guard !trimmedUsername.isEmpty else {
+            errorMessage = "Username cannot be empty"
+            return
+        }
+        
+        do {
+            try await userRepository.updateUsername(uid: uid, username: trimmedUsername)
+            currentUser?.username = trimmedUsername
+            username = trimmedUsername
+        } catch {
+            errorMessage = error.localizedDescription
+            print("Error updating username: \(error)")
+        }
+    }
 }
