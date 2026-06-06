@@ -8,24 +8,32 @@
 import SwiftUI
 
 struct HouseholdTasksView: View {
+    @Bindable var viewModel = TaskViewModel()
+    let householdId: String
+    
     var body: some View {
         VStack(alignment: .leading) {
             Text("Today's Tasks")
                 .font(.headline)
-
+            
+            if viewModel.isLoading {
+                ProgressView()
+            }
             ScrollView {
                 LazyVStack(spacing: 12) {
-                    ForEach(0...5, id: \.self) { index in
+                    ForEach(viewModel.tasks) { task in
                         HStack {
-                            Image(systemName: "circle")
+                            Image(systemName: task.completed ?  "checkmark.circle.fill" : "circle")
                                 .font(.system(size: 34))
                                 .foregroundStyle(.black.opacity(0.4))
+                            
                             VStack(alignment: .leading) {
-                                Text("Task 1")
+                                Text(task.title)
                                 HStack {
                                     Image(systemName: "clock")
-                                    Text("06:00 PM · 20 min")
+                                    Text(task.dueDate.formatted(date: .abbreviated, time: .shortened))
                                 }
+                                .font(.caption)
                             }
 
                             Spacer()
@@ -45,13 +53,22 @@ struct HouseholdTasksView: View {
                             RoundedRectangle(cornerRadius: 16)
                                 .fill(HomeCrewTheme.primaryPurple.opacity(0.08))
                         )
+                        .onTapGesture {
+                            Task {
+                                await viewModel.toggleTask(task)
+                            }
+                            
+                        }
                     }
                 }
             }
+        }
+        .task {
+            await viewModel.fetchTasks(householdID: householdId)
         }
     }
 }
 
 #Preview {
-    HouseholdTasksView()
+    HouseholdTasksView(householdId: "preview-household")
 }

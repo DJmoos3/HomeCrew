@@ -14,6 +14,9 @@ struct TodoView: View {
     
     @State private var selectedTab: TaskTab = .myTasks
     
+    @State private var viewModel: TaskViewModel = .init()
+    
+    
     enum TaskTab {
         case myTasks
         case householdTasks
@@ -139,10 +142,22 @@ struct TodoView: View {
                     switch selectedTab {
                         
                     case .myTasks:
-                        MyTasksView()
-                        
+                        //MyTasksView()
+                        if let householdId = authViewModel.currentUser?.householdId {
+                                   MyTasksView(
+                                    viewModel: viewModel,
+                                    householdID: householdId)
+                               } else {
+                                   Text("No household selected")
+                               }
                     case .householdTasks:
-                        HouseholdTasksView()
+                       //HouseholdTasksView()
+                        if let householdId = authViewModel.currentUser?.householdId {
+                            HouseholdTasksView(viewModel: viewModel,
+                                        householdId: householdId)
+                                } else {
+                                    Text("No household selected")
+                                }
                     }
                 }
                 
@@ -151,6 +166,10 @@ struct TodoView: View {
             .onAppear {
                 Task {
                     await authViewModel.fetchCurrentUser()
+                    if let id = authViewModel.currentUser?.householdId {
+                        await viewModel.fetchTasks(householdID: id)
+                        await viewModel.fetchMembers(householdID: id)
+                    }
                 }
             }
             .padding()
@@ -168,7 +187,18 @@ struct TodoView: View {
                 }
                 .padding()
                 .sheet(isPresented: $showingSheet) {
-                    AddTodoView()
+                    if let user = authViewModel.currentUser,
+                       let householdId = user.householdId {
+
+                        AddTodoView(
+                            viewModel: viewModel,
+                            householdID: householdId,
+                            createdByUserID: user.id!
+                        )
+
+                    } else {
+                        Text("No user / household available")
+                    }
                 }
             }
             .background(HomeCrewTheme.background)

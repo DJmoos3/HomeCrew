@@ -8,64 +8,91 @@
 import SwiftUI
 
 struct MyTasksView: View {
+
+    @Bindable var viewModel = TaskViewModel()
+    let householdID: String
+
+    private var myTask: [HouseholdTask] {
+        guard let currentUserId = viewModel.currentUserId else { return [] }
+        return viewModel.tasks.filter { $0.assignedToUserID == currentUserId }
+    }
+
+    private var nextTask: HouseholdTask? {
+        myTask.first(where: { !$0.completed })
+    }
+
     var body: some View {
-        HStack {
-            VStack(alignment: .leading) {
-                Text("NEXT TASK")
-                    .font(.headline)
-                    .foregroundStyle(.white)
+        VStack {
+
+            //NEXT TASK
+            if let nextTask {
                 HStack {
-                    Image(systemName: "circle")
-                        .font(.system(size: 34))
-                        .foregroundStyle(HomeCrewTheme.mintGreen)
-
                     VStack(alignment: .leading) {
-                        Text("Task 1")
+
+                        Text("NEXT TASK")
+                            .font(.headline)
                             .foregroundStyle(.white)
-                        HStack {
-                            Image(systemName: "clock")
-                            Text("06:00 PM · 20 min")
-                        }
-                        .foregroundStyle(.white)
-                    }
-                    Spacer()
-                }
 
-            }
-            Image(systemName: "fork.knife")
-                .padding()
-                .frame(width: 40, height: 40)
-                .foregroundStyle(HomeCrewTheme.darkBlue)
-                .background(
-                    RoundedRectangle(cornerRadius: 12)
-                        .fill(HomeCrewTheme.mintGreen)
-                )
-        }
-        .padding()
-        .frame(maxWidth: .infinity)
-        .background(
-            RoundedRectangle(cornerRadius: 16)
-                .fill(HomeCrewTheme.darkBlue)
-        )
-        .padding(.bottom)
-
-        VStack(alignment: .leading) {
-            Text("Today's Tasks")
-                .font(.headline)
-            VStack(alignment: .leading) {
-                List {
-                    ForEach(0..<5, id: \.self) { index in
                         HStack {
                             Image(systemName: "circle")
+                                .font(.system(size: 34))
+                                .foregroundStyle(HomeCrewTheme.mintGreen)
+
+                            VStack(alignment: .leading) {
+                                Text(nextTask.title)
+                                    .foregroundStyle(.white)
+
+                                HStack {
+                                    Image(systemName: "clock")
+                                    Text(nextTask.dueDate.formatted(date: .abbreviated, time: .shortened))
+                                }
+                                .foregroundStyle(.white)
+                            }
+
+                            Spacer()
+                        }
+                    }
+
+                    Image(systemName: "fork.knife")
+                        .padding()
+                        .frame(width: 40, height: 40)
+                        .foregroundStyle(HomeCrewTheme.darkBlue)
+                        .background(
+                            RoundedRectangle(cornerRadius: 12)
+                                .fill(HomeCrewTheme.mintGreen)
+                        )
+                }
+                .padding()
+                .frame(maxWidth: .infinity)
+                .background(
+                    RoundedRectangle(cornerRadius: 16)
+                        .fill(HomeCrewTheme.darkBlue)
+                )
+                .padding(.bottom)
+            }
+
+            // TASK LIST
+            VStack(alignment: .leading) {
+                Text("Today's Tasks")
+
+                List {
+                    ForEach(myTask) { task in
+                        HStack {
+
+                            Image(systemName: task.completed
+                                  ? "checkmark.circle.fill"
+                                  : "circle")
                                 .font(.system(size: 34))
                                 .foregroundStyle(HomeCrewTheme.primaryPurple)
 
                             VStack(alignment: .leading) {
-                                Text("Task 1")
+                                Text(task.title)
+
                                 HStack {
                                     Image(systemName: "clock")
-                                    Text("06:00 PM · 20 min")
+                                    Text(task.dueDate.formatted(date: .abbreviated, time: .shortened))
                                 }
+                                .font(.caption)
                             }
 
                             Spacer()
@@ -82,12 +109,17 @@ struct MyTasksView: View {
                         .padding(.vertical, 8)
                         .listRowInsets(EdgeInsets())
                         .listRowBackground(Color.clear)
+                        .onTapGesture {
+                            Task {
+                                await viewModel.toggleTask(task)
+                            }
+                        }
                     }
                 }
                 .listStyle(.plain)
                 .scrollContentBackground(.hidden)
                 .background(Color.clear)
-                .frame(maxHeight: 300)  // important so it behaves like a block
+                .frame(maxHeight: 300)
             }
             .padding()
             .background(
@@ -95,10 +127,12 @@ struct MyTasksView: View {
                     .fill(HomeCrewTheme.darkBlue.opacity(0.04))
             )
         }
-
+        .task {
+            await viewModel.fetchTasks(householdID: householdID)
+        }
     }
 }
 
 #Preview {
-    MyTasksView()
+    MyTasksView(householdID: "preview-household")
 }
