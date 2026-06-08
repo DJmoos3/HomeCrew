@@ -24,6 +24,14 @@ struct TodoView: View {
     
     private let days = ["MON", "TUE", "WED", "THU", "FRI", "SAT", "SUN"]
     
+    private var tasksLeftCount: Int {
+        guard let currentUserId = viewModel.currentUserId else { return 0 }
+        return viewModel.tasks.filter{
+            !$0.completed &&
+            $0.assignedToUserID == currentUserId
+        }.count
+    }
+    
     private var currentWeek: [Date] {
         let calendar = Calendar.current
         let startOfWeek = calendar.dateInterval(of: .weekOfYear, for: Date())!.start
@@ -53,7 +61,7 @@ struct TodoView: View {
                                 Text("Hello, \(authViewModel.currentUser?.username ?? "User")")
                                     .font(.largeTitle.bold())
                                     .foregroundStyle(HomeCrewTheme.textPrimary)
-                                Text("You have **4 tasks** left today")
+                                Text("You have **\(tasksLeftCount) \(tasksLeftCount == 1 ? "task":"tasks")**  left.")
                                     .font(.subheadline)
                                     .foregroundStyle(HomeCrewTheme.textSecondary)
                             }

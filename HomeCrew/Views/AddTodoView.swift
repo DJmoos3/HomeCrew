@@ -260,7 +260,7 @@ struct AddTodoView: View {
                     selectedRepeat = "Once"
                                     }
             } label: {
-                Text("Test Button")
+                Text("Create Task")
                     .frame(maxWidth: .infinity)
                     .padding()
                     .background(HomeCrewTheme.darkBlue)
