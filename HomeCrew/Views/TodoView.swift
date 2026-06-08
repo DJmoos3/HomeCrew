@@ -14,12 +14,23 @@ struct TodoView: View {
     
     @State private var selectedTab: TaskTab = .myTasks
     
+    @State private var viewModel: TaskViewModel = .init()
+    
+    
     enum TaskTab {
         case myTasks
         case householdTasks
     }
     
     private let days = ["MON", "TUE", "WED", "THU", "FRI", "SAT", "SUN"]
+    
+    private var tasksLeftCount: Int {
+        guard let currentUserId = viewModel.currentUserId else { return 0 }
+        return viewModel.tasks.filter{
+            !$0.completed &&
+            $0.assignedToUserID == currentUserId
+        }.count
+    }
     
     private var currentWeek: [Date] {
         let calendar = Calendar.current
@@ -49,7 +60,7 @@ struct TodoView: View {
                                 Text("Hello, \(authViewModel.currentUser?.username ?? "User")")
                                     .font(.largeTitle.bold())
                                     .foregroundStyle(HomeCrewTheme.textPrimary)
-                                Text("You have **4 tasks** left today")
+                                Text("You have **\(tasksLeftCount) \(tasksLeftCount == 1 ? "task":"tasks")**  left.")
                                     .font(.subheadline)
                                     .foregroundStyle(HomeCrewTheme.textSecondary)
                             }
@@ -139,10 +150,22 @@ struct TodoView: View {
                     switch selectedTab {
                         
                     case .myTasks:
-                        MyTasksView()
-                        
+                        //MyTasksView()
+                        if let householdId = authViewModel.currentUser?.householdId {
+                                   MyTasksView(
+                                    viewModel: viewModel,
+                                    householdID: householdId)
+                               } else {
+                                   Text("No household selected")
+                               }
                     case .householdTasks:
-                        HouseholdTasksView()
+                       //HouseholdTasksView()
+                        if let householdId = authViewModel.currentUser?.householdId {
+                            HouseholdTasksView(viewModel: viewModel,
+                                        householdId: householdId)
+                                } else {
+                                    Text("No household selected")
+                                }
                     }
                 }
                 
@@ -151,6 +174,10 @@ struct TodoView: View {
             .onAppear {
                 Task {
                     await authViewModel.fetchCurrentUser()
+                    if let id = authViewModel.currentUser?.householdId {
+                        await viewModel.fetchTasks(householdID: id)
+                        await viewModel.fetchMembers(householdID: id)
+                    }
                 }
             }
             .padding()
@@ -168,7 +195,18 @@ struct TodoView: View {
                 }
                 .padding()
                 .sheet(isPresented: $showingSheet) {
-                    AddTodoView()
+                    if let user = authViewModel.currentUser,
+                       let householdId = user.householdId {
+
+                        AddTodoView(
+                            viewModel: viewModel,
+                            householdID: householdId,
+                            createdByUserID: user.id!
+                        )
+
+                    } else {
+                        Text("No user / household available")
+                    }
                 }
             }
             .background(HomeCrewTheme.background)

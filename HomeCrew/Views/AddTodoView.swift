@@ -8,13 +8,18 @@
 import SwiftUI
 
 struct AddTodoView: View {
-
+    
+    @Bindable var viewModel = TaskViewModel()
+        let householdID: String
+        let createdByUserID: String
+    
     @State private var taskTitle: String = ""
     @State private var selectedCategory: String = "Kitchen"
     @State private var selectedDay: Int = 0
     @State private var selectedTime = Date()
     @State private var timeDuration: Int = 0
     @State private var selectedRepeat = "Once"
+    @State private var selectedMemberID: String? = nil
 
     private let categories = ["Kitchen", "Bathroom", "Laundry", "Clean"]
     private let categoryIcons = [
@@ -211,11 +216,51 @@ struct AddTodoView: View {
             }
 
             Spacer()
+            //ASSIGN TO (NEW SECTION)
+                        VStack(alignment: .leading, spacing: 10) {
+                            Text("Assign To")
+                                .font(.headline)
+                                .foregroundStyle(HomeCrewTheme.textPrimary)
+
+                            Picker("Assign To", selection: $selectedMemberID) {
+
+                                Text("Unassigned")
+                                    .tag(Optional<String>.none)
+
+                                ForEach(viewModel.members) { member in
+                                    Text(member.name)
+                                        .tag(Optional(member.id))
+                                }
+                            }
+                            .pickerStyle(.menu)
+                            .padding()
+                            .background(HomeCrewTheme.cardBackground)
+                            .cornerRadius(12)
+                        }
 
             Button {
+                print("Button works")
                 // Add task action
+                Task {
+                    await viewModel.createTask(
+                        title: taskTitle,
+                        description: "",
+                        householdID: householdID,
+                        assignedToUserID: selectedMemberID,
+                        dueDate: buildDueDate()
+                    )
+                   // await viewModel.fetchTasks(householdID: householdID)
+
+                    // reset UI after creation
+                    taskTitle = ""
+                    timeDuration = 0
+                    selectedDay = 0
+                    selectedTime = Date()
+                    selectedCategory = "Kitchen"
+                    selectedRepeat = "Once"
+                                    }
             } label: {
-                Text("Add Task")
+                Text("Create Task")
                     .frame(maxWidth: .infinity)
                     .padding()
                     .background(HomeCrewTheme.darkBlue)
@@ -228,12 +273,27 @@ struct AddTodoView: View {
                         y: 4
                     )
             }
+            .disabled(taskTitle.trimmingCharacters(in: .whitespaces).isEmpty)
         }
         .padding()
         .background(HomeCrewTheme.background)
     }
+    private func buildDueDate() -> Date {
+            let calendar = Calendar.current
+
+            let selectedWeekDate = currentWeek[selectedDay]
+            let timeComponents = calendar.dateComponents([.hour, .minute], from: selectedTime)
+
+            var components = calendar.dateComponents([.year, .month, .day], from: selectedWeekDate)
+            components.hour = timeComponents.hour
+            components.minute = timeComponents.minute
+
+            return calendar.date(from: components) ?? Date()
+        }
 }
 
 #Preview {
-    AddTodoView()
+    AddTodoView(
+        householdID: "preview-household",
+        createdByUserID: "preview-user")
 }
