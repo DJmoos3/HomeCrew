@@ -37,6 +37,7 @@ struct ProfileView: View {
     @State private var householdViewModel = HouseholdViewModel()
 
     @State private var showInviteAlert = false
+    @State private var showLogoutAlert = false
     @State private var inviteEmail = ""
 
     var body: some View {
@@ -54,9 +55,19 @@ struct ProfileView: View {
                             .foregroundStyle(HomeCrewTheme.primaryPurple)
                     }
                     Spacer()
-                    Button("Logout") {}
-                        .fontWeight(.semibold)
-                        .foregroundStyle(HomeCrewTheme.darkBlue)
+                    Button("Logout") {
+                        showLogoutAlert = true
+                    }
+                    .fontWeight(.semibold)
+                    .foregroundStyle(HomeCrewTheme.darkBlue)
+                    .alert("Log Out", isPresented: $showLogoutAlert) {
+                        Button("Cancel", role: .cancel) {}
+                        Button("Log Out", role: .destructive) {
+                            authViewModel.signOut()
+                        }
+                    } message: {
+                        Text("Are you sure you want to log out?")
+                    }
                 }
                 .padding(.horizontal)
                 .padding(.top)

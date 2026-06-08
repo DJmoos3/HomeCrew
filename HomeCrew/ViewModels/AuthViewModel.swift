@@ -26,10 +26,23 @@ final class AuthViewModel {
         self.userRepository = UserRepository()
     }
 
+    func checkExistingSession() {
+        let hasLaunchedBefore = UserDefaults.standard.bool(forKey: "hasLaunchedBefore")
+        if !hasLaunchedBefore {
+            try? Auth.auth().signOut()
+            UserDefaults.standard.set(true, forKey: "hasLaunchedBefore")
+            return
+        }
+
+        if Auth.auth().currentUser != nil {
+            isSignedIn = true
+            Task { await fetchCurrentUser() }
+        }
+    }
+
     func clearFields() {
         email = ""
         password = ""
-        isSignedIn = false
         errorMessage = nil
     }
 
@@ -86,6 +99,17 @@ final class AuthViewModel {
         }
     }
 
+    func signOut() {
+        do {
+            try AuthRepository.shared.signOut()
+            isSignedIn = false
+            currentUser = nil
+            clearFields()
+        } catch {
+            errorMessage = error.localizedDescription
+        }
+    }
+
     func fetchCurrentUser() async {
         guard let uid = Auth.auth().currentUser?.uid else { return }
         do {
@@ -93,6 +117,30 @@ final class AuthViewModel {
             currentUser = try snapshot.data(as: AppUser.self)
         } catch {
             print("Error fetching user: \(error)")
+        }
+    }
+    
+    // Update username in Firestore (omar)
+    func updateUsername(_ newUsername: String) async {
+        guard let uid = currentUser?.id else {
+            errorMessage = "Could not find current user"
+            return
+        }
+        
+        let trimmedUsername = newUsername.trimmingCharacters(in: .whitespacesAndNewlines)
+        
+        guard !trimmedUsername.isEmpty else {
+            errorMessage = "Username cannot be empty"
+            return
+        }
+        
+        do {
+            try await userRepository.updateUsername(uid: uid, username: trimmedUsername)
+            currentUser?.username = trimmedUsername
+            username = trimmedUsername
+        } catch {
+            errorMessage = error.localizedDescription
+            print("Error updating username: \(error)")
         }
     }
 }

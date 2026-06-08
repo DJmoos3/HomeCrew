@@ -95,12 +95,6 @@ struct LoginView: View {
                                 .background(HomeCrewTheme.primaryPurple)
                                 .clipShape(RoundedRectangle(cornerRadius: 30))
                         }
-                        .navigationDestination(
-                            isPresented: $viewModel.isSignedIn
-                        ) {
-                            ContentView()
-                                .environment(viewModel)
-                        }
                         .alert(
                             "Error",
                             isPresented: Binding(
