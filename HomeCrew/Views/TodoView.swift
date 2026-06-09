@@ -40,6 +40,18 @@ struct TodoView: View {
             calendar.date(byAdding: .day, value: $0, to: startOfWeek)
         }
     }
+    //Show completed total tasks for each day
+    private func taskCount(for date: Date) -> String {
+        let calendar = Calendar.current
+
+        let tasksForDay = viewModel.tasks.filter {
+            calendar.isDate($0.dueDate, inSameDayAs: date)
+        }
+
+        let completed = tasksForDay.filter(\.completed).count
+
+        return "\(completed)/\(tasksForDay.count)"
+    }
     
     var body: some View {
             VStack {
@@ -131,7 +143,8 @@ struct TodoView: View {
                                 .font(.subheadline.bold())
                             Text(currentWeek[index].formatted(.dateTime.day()))
                                 .font(.title3.bold())
-                            Text("2/2")
+                            //Update task count
+                            Text(taskCount(for: currentWeek[index]))
                                 .font(.footnote)
                         }
                         .padding(4)
