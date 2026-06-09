@@ -88,7 +88,8 @@ struct ChatListView: View {
                     chatId: chatId,
                     title: selectedChatTitle,
                     householdId: householdId,
-                    currentUserId: currentUserId
+                    currentUserId: currentUserId,
+                    members: householdViewModel.members
                 )
 
             }
@@ -105,7 +106,9 @@ struct ChatListView: View {
     }
 
     private var groupChatCard: some View {
-        Button {
+        let chat = groupChat()
+        
+        return Button {
             Task {
                 guard let householdId = authViewModel.currentUser?.householdId
                 else {
@@ -126,15 +129,18 @@ struct ChatListView: View {
         } label: {
             chatCard(
                 title: "Group Chat",
-                subtitle: subtitle(for: groupChat()),
+                subtitle: subtitle(for: chat),
+                timestamp: timestamp(for: chat),
                 systemImage: "person.3.fill",
-                hasUnread: hasUnreadMessages(for: groupChat())
+                hasUnread: hasUnreadMessages(for: chat)
             )
         }
     }
 
     private func directChatCard(member: Member) -> some View {
-        Button {
+        let chat = directChat(for: member)
+        
+        return Button {
             Task {
                 guard let householdId = authViewModel.currentUser?.householdId,
                     let currentUserId = authViewModel.currentUser?.id
@@ -157,9 +163,10 @@ struct ChatListView: View {
         } label: {
             chatCard(
                 title: member.name,
-                subtitle: subtitle(for: directChat(for: member)),
+                subtitle: subtitle(for: chat),
+                timestamp: timestamp(for: chat),
                 systemImage: "person.2.fill",
-                hasUnread: hasUnreadMessages(for: directChat(for: member))
+                hasUnread: hasUnreadMessages(for: chat)
             )
         }
     }
@@ -167,6 +174,7 @@ struct ChatListView: View {
     private func chatCard(
         title: String,
         subtitle: String,
+        timestamp: String?,
         systemImage: String,
         hasUnread: Bool = false
     ) -> some View {
@@ -195,9 +203,17 @@ struct ChatListView: View {
                 Text(subtitle)
                     .font(.subheadline)
                     .foregroundStyle(HomeCrewTheme.textSecondary)
+                    .multilineTextAlignment(.leading)
+                    .lineLimit(2)
             }
 
             Spacer()
+            
+            if let timestamp {
+                Text(timestamp)
+                    .font(.caption)
+                    .foregroundStyle(HomeCrewTheme.textSecondary)
+            }
 
             Image(systemName: "chevron.right")
                 .font(.headline)
@@ -209,6 +225,27 @@ struct ChatListView: View {
         .clipShape(
             RoundedRectangle(cornerRadius: HomeCrewTheme.cornerRadius)
         )
+    }
+    
+    private func displayDate(_ date: Date) -> String {
+        let calendar = Calendar.current
+
+        if calendar.isDateInToday(date) {
+            return date.formatted(date: .omitted, time: .shortened)
+        }
+
+        if calendar.isDateInYesterday(date) {
+            return "Yesterday"
+        }
+
+        return date.formatted(date: .abbreviated, time: .omitted)
+    }
+    
+    private func timestamp(for chat: Chat?) -> String? {
+        guard let date = chat?.lastMessageAt else {
+            return nil
+        }
+        return displayDate(date)
     }
 
     private func loadHousehold() async {
@@ -256,16 +293,13 @@ struct ChatListView: View {
             return "No messages yet"
         }
 
-        guard let lastMessage = chat.lastMessage,
-            let lastMessageAt = chat.lastMessageAt
-        else {
+        guard let lastMessage = chat.lastMessage else {
             return "No messages yet"
         }
 
         let senderName = memberName(for: chat.lastMessageSenderId)
 
-        return
-            "\(senderName): \(lastMessage) · \(lastMessageAt.formatted(date: .omitted, time: .shortened))"
+        return "\(senderName): \(lastMessage)"
     }
 
     private func hasUnreadMessages(for chat: Chat?) -> Bool {

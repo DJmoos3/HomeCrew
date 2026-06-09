@@ -10,12 +10,14 @@ import SwiftUI
 struct ChatRoomView: View {
 
     @State private var chatRoomViewModel = ChatRoomViewModel()
-    @Environment(ChatNotificationViewModel.self) private var chatNotificationViewModel
+    @Environment(ChatNotificationViewModel.self) private
+        var chatNotificationViewModel
 
     let chatId: String
     let title: String
     let householdId: String
     let currentUserId: String
+    let members: [Member]
 
     var body: some View {
         VStack {
@@ -24,7 +26,10 @@ struct ChatRoomView: View {
                     ForEach(chatRoomViewModel.messages) { message in
                         MessageCell(
                             message: message,
-                            isMe: message.senderId == currentUserId
+                            isMe: message.senderId == currentUserId,
+                            senderName: senderName(for: message.senderId),
+                            initials: initials(for: message.senderId),
+                            avatarColor: avatarColor(for: message.senderId)
                         )
                     }
                 }
@@ -49,6 +54,7 @@ struct ChatRoomView: View {
                         cornerRadius: HomeCrewTheme.cornerRadius
                     )
                 )
+
                 Button {
                     Task {
                         await chatRoomViewModel.sendMessage(
@@ -65,7 +71,11 @@ struct ChatRoomView: View {
                         .background(HomeCrewTheme.primaryPurple)
                         .clipShape(Circle())
                 }
-                .disabled(chatRoomViewModel.newMessageText.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty)
+                .disabled(
+                    chatRoomViewModel.newMessageText
+                        .trimmingCharacters(in: .whitespacesAndNewlines)
+                        .isEmpty
+                )
             }
             .padding()
             .background(HomeCrewTheme.background)
@@ -101,49 +111,125 @@ struct ChatRoomView: View {
             chatNotificationViewModel.setActiveChat(nil)
         }
     }
+
+    private func member(for userId: String) -> Member? {
+        members.first { $0.id == userId }
+    }
+
+    private func senderName(for userId: String) -> String {
+        if userId == currentUserId {
+            return "You"
+        }
+
+        return member(for: userId)?.name ?? "Unknown"
+    }
+
+    private func initials(for userId: String) -> String {
+        let name = member(for: userId)?.name ?? "?"
+        let parts = name.split(separator: " ")
+
+        let initials =
+            parts
+            .prefix(2)
+            .compactMap { $0.first }
+            .map { String($0).uppercased() }
+            .joined()
+
+        return initials.isEmpty ? "?" : initials
+    }
+
+    private func avatarColor(for userId: String) -> Color {
+        let colors: [Color] = [
+            .purple,
+            .blue,
+            .green,
+            .orange,
+            .pink,
+            .teal,
+            .indigo,
+        ]
+
+        let value = abs(userId.hashValue)
+        return colors[value % colors.count]
+    }
 }
 
 struct MessageCell: View {
 
     let message: Message
     let isMe: Bool
+    let senderName: String
+    let initials: String
+    let avatarColor: Color
 
     var body: some View {
-        HStack {
+        HStack(alignment: .bottom) {
             if isMe {
                 Spacer()
             } else {
-                Circle()
-                    .fill(HomeCrewTheme.primaryPurple)
-                    .frame(width: 25, height: 25)
-
+                avatar
             }
 
-            Text(message.text)
-                .padding(12)
-                .background(
-                    isMe
-                        ? HomeCrewTheme.primaryPurple
-                        : HomeCrewTheme.cardBackground
-                )
-                .foregroundStyle(
-                    isMe
-                        ? HomeCrewTheme.background
-                        : HomeCrewTheme.textPrimary
-                )
-                .clipShape(RoundedRectangle(cornerRadius: 16))
-                .frame(
-                    maxWidth: 260,
-                    alignment: isMe ? .trailing : .leading
-                )
+            VStack(alignment: isMe ? .trailing : .leading, spacing: 4) {
+                HStack(spacing: 6) {
+                    Text(senderName)
+                        .font(.caption)
+                        .fontWeight(.semibold)
+
+                    Text(
+                        message.createdAt.formatted(
+                            date: .abbreviated,
+                            time: .shortened
+                        )
+                    )
+                    .font(.caption2)
+                }
+                .foregroundStyle(HomeCrewTheme.textSecondary)
+
+                Text(message.text)
+                    .padding(12)
+                    .background(
+                        isMe
+                            ? HomeCrewTheme.primaryPurple
+                            : HomeCrewTheme.cardBackground
+                    )
+                    .foregroundStyle(
+                        isMe
+                            ? HomeCrewTheme.background
+                            : HomeCrewTheme.textPrimary
+                    )
+                    .clipShape(RoundedRectangle(cornerRadius: 16))
+                    .frame(
+                        maxWidth: 260,
+                        alignment: isMe ? .trailing : .leading
+                    )
+            }
 
             if !isMe {
                 Spacer()
             }
         }
     }
+
+    private var avatar: some View {
+        Circle()
+            .fill(avatarColor)
+            .frame(width: 30, height: 30)
+            .overlay {
+                Text(initials)
+                    .font(.caption2)
+                    .fontWeight(.bold)
+                    .foregroundStyle(.white)
+            }
+    }
 }
 
 #Preview {
-    ChatRoomView(chatId: "Test", title: "Test", householdId: "Test", currentUserId: "Test")
+    ChatRoomView(
+        chatId: "Test",
+        title: "Test",
+        householdId: "Test",
+        currentUserId: "Test",
+        members: []
+    )
 }
