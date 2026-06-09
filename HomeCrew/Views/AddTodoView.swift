@@ -14,22 +14,18 @@ struct AddTodoView: View {
         let createdByUserID: String
     
     @State private var taskTitle: String = ""
-    @State private var selectedCategory: String = "Kitchen"
     @State private var selectedDay: Int = 0
     @State private var selectedTime = Date()
     @State private var timeDuration: Int = 0
     @State private var selectedRepeat = "Once"
     @State private var selectedMemberID: String? = nil
 
-    private let categories = ["Kitchen", "Bathroom", "Laundry", "Clean"]
-    private let categoryIcons = [
-        "fork.knife", "bathtub", "dryer", "paintbrush",
-    ]
     private let days = ["MON", "TUE", "WED", "THU", "FRI", "SAT", "SUN"]
     private let repeatChoice = [
         "Once", "Daily", "Weekly", "Every Other Week", "Monthly",
     ]
 
+    
     private var currentWeek: [Date] {
         let calendar = Calendar.current
         let startOfWeek = calendar.dateInterval(of: .weekOfYear, for: Date())!
@@ -49,40 +45,7 @@ struct AddTodoView: View {
                 .cornerRadius(12)
                 .foregroundStyle(HomeCrewTheme.textPrimary)
 
-            VStack(alignment: .leading, spacing: 10) {
-                Text("Category")
-                    .font(.headline)
-                    .foregroundStyle(HomeCrewTheme.textPrimary)
-
-                ScrollView(.horizontal, showsIndicators: false) {
-                    HStack(spacing: 10) {
-                        ForEach(categories.indices, id: \.self) { index in
-                            HStack(spacing: 6) {
-                                Image(systemName: categoryIcons[index])
-                                Text(categories[index])
-                            }
-                            .padding(.vertical, 8)
-                            .padding(.horizontal, 12)
-                            .background(
-                                RoundedRectangle(cornerRadius: 10)
-                                    .foregroundStyle(
-                                        selectedCategory == categories[index]
-                                            ? HomeCrewTheme.darkBlue
-                                            : HomeCrewTheme.cardBackground
-                                    )
-                            )
-                            .foregroundStyle(
-                                selectedCategory == categories[index]
-                                    ? .white
-                                    : HomeCrewTheme.textPrimary
-                            )
-                            .onTapGesture {
-                                selectedCategory = categories[index]
-                            }
-                        }
-                    }
-                }
-            }
+            
 
             VStack(alignment: .leading, spacing: 10) {
                 Text("Day")
@@ -256,7 +219,6 @@ struct AddTodoView: View {
                     timeDuration = 0
                     selectedDay = 0
                     selectedTime = Date()
-                    selectedCategory = "Kitchen"
                     selectedRepeat = "Once"
                                     }
             } label: {
