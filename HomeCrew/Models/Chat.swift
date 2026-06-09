@@ -21,4 +21,6 @@ struct Chat: Codable, Identifiable {
     var createdAt: Date
     var lastMessage: String?
     var lastMessageAt: Date?
+    var lastMessageSenderId: String?
+    var lastReadAtByUser: [String: Date]?
 }
