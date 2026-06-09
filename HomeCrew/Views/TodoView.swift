@@ -16,6 +16,8 @@ struct TodoView: View {
     
     @State private var viewModel: TaskViewModel = .init()
     
+    @State private var showSuccess: Bool = false
+    
     
     enum TaskTab {
         case myTasks
@@ -214,7 +216,8 @@ struct TodoView: View {
                         AddTodoView(
                             viewModel: viewModel,
                             householdID: householdId,
-                            createdByUserID: user.id!
+                            createdByUserID: user.id!,
+                            onTaskCreated: {showSuccess = true}
                         )
 
                     } else {
@@ -223,6 +226,12 @@ struct TodoView: View {
                 }
             }
             .background(HomeCrewTheme.background)
+        //Success msg
+            .alert("Task created", isPresented: $showSuccess){
+                Button("OK") { }
+            } message: {
+                Text("Your task is created successfully.")
+            }
     }
 }
 

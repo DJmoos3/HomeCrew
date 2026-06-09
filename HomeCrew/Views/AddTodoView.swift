@@ -12,6 +12,9 @@ struct AddTodoView: View {
     @Bindable var viewModel = TaskViewModel()
         let householdID: String
         let createdByUserID: String
+    @Environment(\.dismiss) private var dismiss
+    
+    var onTaskCreated: (() -> Void)?
     
     @State private var taskTitle: String = ""
     @State private var selectedDay: Int = 0
@@ -179,7 +182,7 @@ struct AddTodoView: View {
             }
 
             Spacer()
-            //ASSIGN TO (NEW SECTION)
+            //Assign TO Member
                         VStack(alignment: .leading, spacing: 10) {
                             Text("Assign To")
                                 .font(.headline)
@@ -212,14 +215,11 @@ struct AddTodoView: View {
                         assignedToUserID: selectedMemberID,
                         dueDate: buildDueDate()
                     )
-                   // await viewModel.fetchTasks(householdID: householdID)
-
-                    // reset UI after creation
-                    taskTitle = ""
-                    timeDuration = 0
-                    selectedDay = 0
-                    selectedTime = Date()
-                    selectedRepeat = "Once"
+                    
+                    await viewModel.fetchTasks(householdID: householdID)
+        
+                    onTaskCreated?()
+                    dismiss()
                                     }
             } label: {
                 Text("Create Task")
