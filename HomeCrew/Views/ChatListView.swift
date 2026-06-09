@@ -1,5 +1,5 @@
 //
-//  ChatView.swift
+//  ChatListView.swift
 //  HomeCrew
 //
 //  Created by Erik on 2026-05-20.
@@ -7,7 +7,7 @@
 
 import SwiftUI
 
-struct ChatView: View {
+struct ChatListView: View {
 
     @Environment(AuthViewModel.self) private var authViewModel
 
