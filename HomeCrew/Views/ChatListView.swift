@@ -10,7 +10,8 @@ import SwiftUI
 struct ChatListView: View {
 
     @Environment(AuthViewModel.self) private var authViewModel
-    @Environment(ChatNotificationViewModel.self) private var chatNotificationViewModel
+    @Environment(ChatNotificationViewModel.self) private
+        var chatNotificationViewModel
     @State private var chatListViewModel = ChatListViewModel()
 
     @State private var householdViewModel = HouseholdViewModel()
@@ -126,7 +127,8 @@ struct ChatListView: View {
             chatCard(
                 title: "Group Chat",
                 subtitle: subtitle(for: groupChat()),
-                systemImage: "person.3.fill"
+                systemImage: "person.3.fill",
+                hasUnread: hasUnreadMessages(for: groupChat())
             )
         }
     }
@@ -137,7 +139,8 @@ struct ChatListView: View {
                 guard let householdId = authViewModel.currentUser?.householdId,
                     let currentUserId = authViewModel.currentUser?.id
                 else {
-                    chatListViewModel.errorMessage = "No user or household found"
+                    chatListViewModel.errorMessage =
+                        "No user or household found"
                     return
                 }
 
@@ -155,7 +158,8 @@ struct ChatListView: View {
             chatCard(
                 title: member.name,
                 subtitle: subtitle(for: directChat(for: member)),
-                systemImage: "person.2.fill"
+                systemImage: "person.2.fill",
+                hasUnread: hasUnreadMessages(for: directChat(for: member))
             )
         }
     }
@@ -163,16 +167,26 @@ struct ChatListView: View {
     private func chatCard(
         title: String,
         subtitle: String,
-        systemImage: String
+        systemImage: String,
+        hasUnread: Bool = false
     ) -> some View {
         HStack(spacing: 18) {
-            Circle()
-                .fill(HomeCrewTheme.primaryPurple.opacity(0.15))
-                .frame(width: 54, height: 54)
-                .overlay(
-                    Image(systemName: systemImage)
-                        .foregroundStyle(HomeCrewTheme.primaryPurple)
-                )
+            ZStack(alignment: .topTrailing) {
+                Circle()
+                    .fill(HomeCrewTheme.primaryPurple.opacity(0.15))
+                    .frame(width: 54, height: 54)
+                    .overlay(
+                        Image(systemName: systemImage)
+                            .foregroundStyle(HomeCrewTheme.primaryPurple)
+                    )
+
+                if hasUnread {
+                    Circle()
+                        .fill(.red)
+                        .frame(width: 10, height: 10)
+                        .offset(x: 6, y: -6)
+                }
+            }
 
             VStack(alignment: .leading, spacing: 4) {
                 Text(title)
@@ -201,7 +215,8 @@ struct ChatListView: View {
         await authViewModel.fetchCurrentUser()
 
         guard let householdId = authViewModel.currentUser?.householdId,
-              let currentUserId = authViewModel.currentUser?.id else {
+            let currentUserId = authViewModel.currentUser?.id
+        else {
             return
         }
 
@@ -214,15 +229,14 @@ struct ChatListView: View {
             currentUserId: currentUserId
         )
     }
-    
+
     private func groupChat() -> Chat? {
         chatListViewModel.chats.first { $0.type == .group }
     }
 
     private func directChat(for member: Member) -> Chat? {
         chatListViewModel.chats.first { chat in
-            chat.type == .direct &&
-            chat.memberIds.contains(member.id)
+            chat.type == .direct && chat.memberIds.contains(member.id)
         }
     }
 
@@ -233,7 +247,8 @@ struct ChatListView: View {
             return "You"
         }
 
-        return householdViewModel.members.first { $0.id == userId }?.name ?? "Someone"
+        return householdViewModel.members.first { $0.id == userId }?.name
+            ?? "Someone"
     }
 
     private func subtitle(for chat: Chat?) -> String {
@@ -242,12 +257,37 @@ struct ChatListView: View {
         }
 
         guard let lastMessage = chat.lastMessage,
-              let lastMessageAt = chat.lastMessageAt else {
+            let lastMessageAt = chat.lastMessageAt
+        else {
             return "No messages yet"
         }
 
         let senderName = memberName(for: chat.lastMessageSenderId)
 
-        return "\(senderName): \(lastMessage) · \(lastMessageAt.formatted(date: .omitted, time: .shortened))"
+        return
+            "\(senderName): \(lastMessage) · \(lastMessageAt.formatted(date: .omitted, time: .shortened))"
+    }
+
+    private func hasUnreadMessages(for chat: Chat?) -> Bool {
+        guard let chat else { return false }
+
+        guard let currentUserId = authViewModel.currentUser?.id else {
+            return false
+        }
+
+        guard let lastMessageAt = chat.lastMessageAt else {
+            return false
+        }
+
+        // Visa inte oläst om jag själv skickade senaste meddelandet
+        if chat.lastMessageSenderId == currentUserId {
+            return false
+        }
+
+        guard let lastReadAt = chat.lastReadAtByUser?[currentUserId] else {
+            return true
+        }
+
+        return lastMessageAt > lastReadAt
     }
 }
