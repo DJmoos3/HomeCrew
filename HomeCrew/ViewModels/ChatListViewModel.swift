@@ -5,16 +5,19 @@
 //  Created by Erik on 2026-06-09.
 //
 
-
 import Foundation
 import Observation
+import FirebaseFirestore
 
 @Observable
 @MainActor
 final class ChatListViewModel {
+    var chats: [Chat] = []
     var errorMessage: String?
 
     private let repository = ChatRepository()
+
+    private var chatsListener: ListenerRegistration?
 
     func openGroupChat(
         householdId: String,
@@ -47,5 +50,26 @@ final class ChatListViewModel {
             errorMessage = error.localizedDescription
             return nil
         }
+    }
+
+    func startListeningToChats(
+        householdId: String,
+        currentUserId: String
+    ) {
+        chatsListener?.remove()
+
+        chatsListener = repository.listenToChats(
+            householdId: householdId,
+            currentUserId: currentUserId
+        ) { [weak self] chats in
+            Task { @MainActor in
+                self?.chats = chats
+            }
+        }
+    }
+
+    func stopListening() {
+        chatsListener?.remove()
+        chatsListener = nil
     }
 }

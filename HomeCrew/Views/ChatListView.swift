@@ -92,6 +92,9 @@ struct ChatListView: View {
 
             }
         }
+        .onDisappear {
+            chatListViewModel.stopListening()
+        }
     }
 
     private var otherMembers: [Member] {
@@ -121,8 +124,8 @@ struct ChatListView: View {
             }
         } label: {
             chatCard(
-                title: "Groupd Chat",
-                subtitle: "Chat with everyone in your household",
+                title: "Group Chat",
+                subtitle: subtitle(for: groupChat()),
                 systemImage: "person.3.fill"
             )
         }
@@ -151,7 +154,7 @@ struct ChatListView: View {
         } label: {
             chatCard(
                 title: member.name,
-                subtitle: "Open conversation",
+                subtitle: subtitle(for: directChat(for: member)),
                 systemImage: "person.2.fill"
             )
         }
@@ -195,9 +198,10 @@ struct ChatListView: View {
     }
 
     private func loadHousehold() async {
-
         await authViewModel.fetchCurrentUser()
-        guard let householdId = authViewModel.currentUser?.householdId else {
+
+        guard let householdId = authViewModel.currentUser?.householdId,
+              let currentUserId = authViewModel.currentUser?.id else {
             return
         }
 
@@ -205,5 +209,45 @@ struct ChatListView: View {
             householdId: householdId
         )
 
+        chatListViewModel.startListeningToChats(
+            householdId: householdId,
+            currentUserId: currentUserId
+        )
+    }
+    
+    private func groupChat() -> Chat? {
+        chatListViewModel.chats.first { $0.type == .group }
+    }
+
+    private func directChat(for member: Member) -> Chat? {
+        chatListViewModel.chats.first { chat in
+            chat.type == .direct &&
+            chat.memberIds.contains(member.id)
+        }
+    }
+
+    private func memberName(for userId: String?) -> String {
+        guard let userId else { return "Someone" }
+
+        if userId == authViewModel.currentUser?.id {
+            return "You"
+        }
+
+        return householdViewModel.members.first { $0.id == userId }?.name ?? "Someone"
+    }
+
+    private func subtitle(for chat: Chat?) -> String {
+        guard let chat else {
+            return "No messages yet"
+        }
+
+        guard let lastMessage = chat.lastMessage,
+              let lastMessageAt = chat.lastMessageAt else {
+            return "No messages yet"
+        }
+
+        let senderName = memberName(for: chat.lastMessageSenderId)
+
+        return "\(senderName): \(lastMessage) · \(lastMessageAt.formatted(date: .omitted, time: .shortened))"
     }
 }
