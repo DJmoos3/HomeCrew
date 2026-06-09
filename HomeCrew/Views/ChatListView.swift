@@ -10,8 +10,8 @@ import SwiftUI
 struct ChatListView: View {
 
     @Environment(AuthViewModel.self) private var authViewModel
-
-    @State private var chatViewModel = ChatViewModel()
+    @Environment(ChatNotificationViewModel.self) private var chatNotificationViewModel
+    @State private var chatListViewModel = ChatListViewModel()
 
     @State private var householdViewModel = HouseholdViewModel()
     @State private var selectedChatId: String?
@@ -60,7 +60,7 @@ struct ChatListView: View {
                     Spacer()
                 }
 
-                if let errorMessage = chatViewModel.errorMessage {
+                if let errorMessage = chatListViewModel.errorMessage {
                     Text(errorMessage)
                         .foregroundStyle(.red)
                         .frame(maxWidth: .infinity, alignment: .leading)
@@ -105,22 +105,23 @@ struct ChatListView: View {
             Task {
                 guard let householdId = authViewModel.currentUser?.householdId
                 else {
-                    chatViewModel.errorMessage = "No household found"
+                    chatListViewModel.errorMessage = "No household found"
                     return
                 }
 
                 let memberIds = householdViewModel.members.map { $0.id }
-                if let chatId = await chatViewModel.openGroupChat(
+                if let chatId = await chatListViewModel.openGroupChat(
                     householdId: householdId,
                     memberIds: memberIds
                 ) {
+                    chatNotificationViewModel.setActiveChat(chatId)
                     selectedChatId = chatId
-                    selectedChatTitle = "Alla"
+                    selectedChatTitle = "Group Chat"
                 }
             }
         } label: {
             chatCard(
-                title: "Alla",
+                title: "Groupd Chat",
                 subtitle: "Chat with everyone in your household",
                 systemImage: "person.3.fill"
             )
@@ -133,15 +134,16 @@ struct ChatListView: View {
                 guard let householdId = authViewModel.currentUser?.householdId,
                     let currentUserId = authViewModel.currentUser?.id
                 else {
-                    chatViewModel.errorMessage = "No user or household found"
+                    chatListViewModel.errorMessage = "No user or household found"
                     return
                 }
 
-                if let chatId = await chatViewModel.openDirectChat(
+                if let chatId = await chatListViewModel.openDirectChat(
                     householdId: householdId,
                     currentUserId: currentUserId,
                     otherMember: member
                 ) {
+                    chatNotificationViewModel.setActiveChat(chatId)
                     selectedChatId = chatId
                     selectedChatTitle = member.name
                 }

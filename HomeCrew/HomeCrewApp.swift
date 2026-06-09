@@ -29,6 +29,7 @@ struct HomeCrewApp: App {
     @UIApplicationDelegateAdaptor(AppDelegate.self) var delegate
 
     @State private var authViewModel = AuthViewModel()
+    @State private var chatNotificationViewModel = ChatNotificationViewModel()
 
     var body: some Scene {
         WindowGroup {
@@ -44,6 +45,7 @@ struct HomeCrewApp: App {
                 }
             }
             .environment(authViewModel)
+            .environment(chatNotificationViewModel)
             .preferredColorScheme(darkMode ? .dark : .light)
             .onAppear {
                 authViewModel.checkExistingSession()

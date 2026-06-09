@@ -9,7 +9,8 @@ import SwiftUI
 
 struct ChatRoomView: View {
 
-    @State private var viewModel = ChatViewModel()
+    @State private var chatRoomViewModel = ChatRoomViewModel()
+    @Environment(ChatNotificationViewModel.self) private var chatNotificationViewModel
 
     let chatId: String
     let title: String
@@ -20,7 +21,7 @@ struct ChatRoomView: View {
         VStack {
             ScrollView {
                 VStack(spacing: 10) {
-                    ForEach(viewModel.messages) { message in
+                    ForEach(chatRoomViewModel.messages) { message in
                         MessageCell(
                             message: message,
                             isMe: message.senderId == currentUserId
@@ -35,8 +36,8 @@ struct ChatRoomView: View {
 
             HStack {
                 TextField(
-                    "Skriv ett meddelande...",
-                    text: $viewModel.newMessageText,
+                    "Write a message...",
+                    text: $chatRoomViewModel.newMessageText,
                     axis: .vertical
                 )
                 .lineLimit(1...5)
@@ -50,7 +51,7 @@ struct ChatRoomView: View {
                 )
                 Button {
                     Task {
-                        await viewModel.sendMessage(
+                        await chatRoomViewModel.sendMessage(
                             householdId: householdId,
                             chatId: chatId,
                             senderId: currentUserId
@@ -64,7 +65,7 @@ struct ChatRoomView: View {
                         .background(HomeCrewTheme.primaryPurple)
                         .clipShape(Circle())
                 }
-                .disabled(viewModel.newMessageText.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty)
+                .disabled(chatRoomViewModel.newMessageText.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty)
             }
             .padding()
             .background(HomeCrewTheme.background)
@@ -73,7 +74,31 @@ struct ChatRoomView: View {
         .navigationTitle(title)
         .navigationBarTitleDisplayMode(.inline)
         .task {
-            await viewModel.loadMessages(householdId: householdId, chatId: chatId)
+            chatNotificationViewModel.setActiveChat(chatId)
+
+            chatRoomViewModel.startListeningToMessages(
+                householdId: householdId,
+                chatId: chatId
+            )
+
+            await chatRoomViewModel.markChatAsRead(
+                householdId: householdId,
+                chatId: chatId,
+                userId: currentUserId
+            )
+        }
+        .onChange(of: chatRoomViewModel.messages.count) { _, _ in
+            Task {
+                await chatRoomViewModel.markChatAsRead(
+                    householdId: householdId,
+                    chatId: chatId,
+                    userId: currentUserId
+                )
+            }
+        }
+        .onDisappear {
+            chatRoomViewModel.stopListening()
+            chatNotificationViewModel.setActiveChat(nil)
         }
     }
 }
