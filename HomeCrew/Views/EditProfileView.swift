@@ -9,24 +9,44 @@ import SwiftUI
 
 struct EditProfileView: View {
 
+    // ViewModel for the logged in user
     @Environment(AuthViewModel.self) private var authViewModel
+
+    // ViewModel for household data
     @State private var householdViewModel = HouseholdViewModel()
 
+    // These settings are saved locally on the device
     @AppStorage("darkModeEnabled") private var darkMode = false
     @AppStorage("taskReminderEnabled") private var taskReminder = true
 
+    // States for editing username
     @State private var editedFullName = ""
     @State private var showNameEditor = false
 
+    // States for editing household name
     @State private var editedHouseholdName = ""
     @State private var showHouseholdNameEditor = false
 
+    // Alert after saving
     @State private var showSaveAlert = false
 
+    // Gets the username from the current user
     private var displayName: String {
         authViewModel.currentUser?.username ?? "No name set"
     }
 
+    // Gets the first letter from the username for the avatar
+    private var avatarLetter: String {
+        let name = displayName.trimmingCharacters(in: .whitespacesAndNewlines)
+
+        if let firstLetter = name.first {
+            return String(firstLetter).uppercased()
+        }
+
+        return "?"
+    }
+
+    // Shows the household name or a default text
     private var displayHouseholdName: String {
         if householdViewModel.householdName.isEmpty {
             return "No household set"
@@ -43,6 +63,7 @@ struct EditProfileView: View {
 
                 sectionTitle("Profile Information")
 
+                // Opens sheet to edit the username
                 Button {
                     editedFullName = displayName
                     showNameEditor = true
@@ -59,6 +80,7 @@ struct EditProfileView: View {
 
                 sectionTitle("Household Settings")
 
+                // Opens sheet to edit the household name
                 Button {
                     editedHouseholdName = displayHouseholdName
                     showHouseholdNameEditor = true
@@ -91,6 +113,7 @@ struct EditProfileView: View {
 
                 sectionTitle("Preferences")
 
+                // Task reminder toggle
                 VStack(alignment: .leading, spacing: 8) {
                     toggleRow(
                         icon: "bell.fill",
@@ -109,6 +132,7 @@ struct EditProfileView: View {
                     .padding(.horizontal, 4)
                 }
 
+                // Dark mode toggle
                 toggleRow(
                     icon: "moon.fill",
                     iconColor: HomeCrewTheme.primaryPurple,
@@ -138,6 +162,7 @@ struct EditProfileView: View {
         }
     }
 
+    // Sheet for changing the username
     private var editNameSheet: some View {
         NavigationStack {
             VStack(spacing: 20) {
@@ -180,6 +205,7 @@ struct EditProfileView: View {
         }
     }
 
+    // Sheet for changing the household name
     private var editHouseholdNameSheet: some View {
         NavigationStack {
             VStack(spacing: 20) {
@@ -194,6 +220,7 @@ struct EditProfileView: View {
                     )
                     .padding(.horizontal)
 
+                // Shows error message if the household name cannot be saved
                 if let errorMessage = householdViewModel.errorMessage {
                     Text(errorMessage)
                         .font(.caption)
@@ -224,6 +251,7 @@ struct EditProfileView: View {
         }
     }
 
+    // Loads the household name from Firebase
     private func loadHouseholdName() {
         guard let householdId = authViewModel.currentUser?.householdId else {
             return
@@ -238,6 +266,7 @@ struct EditProfileView: View {
         }
     }
 
+    // Saves the new household name to Firebase
     private func saveHouseholdName() {
         guard let householdId = authViewModel.currentUser?.householdId else {
             householdViewModel.errorMessage = "Could not find household"
@@ -258,16 +287,18 @@ struct EditProfileView: View {
         }
     }
 
+    // Top part of the profile page
     private var profileHeader: some View {
         VStack(spacing: 10) {
             ZStack {
                 Circle()
-                    .fill(HomeCrewTheme.primaryPurple.opacity(0.12))
+                    .fill(HomeCrewTheme.primaryPurple)
                     .frame(width: 120, height: 120)
 
-                Image(systemName: "person.2.fill")
-                    .font(.system(size: 52))
-                    .foregroundStyle(HomeCrewTheme.primaryPurple)
+                // Avatar with first letter of username
+                Text(avatarLetter)
+                    .font(.system(size: 48, weight: .bold))
+                    .foregroundStyle(.white)
 
                 Image(systemName: "checkmark.square.fill")
                     .font(.system(size: 32))
@@ -287,6 +318,7 @@ struct EditProfileView: View {
         .padding(.top, 20)
     }
 
+    // Small title for each section
     private func sectionTitle(_ title: String) -> some View {
         HStack {
             Text(title)
@@ -298,6 +330,7 @@ struct EditProfileView: View {
         }
     }
 
+    // Reusable row for profile settings
     private func profileRow(
         icon: String,
         iconColor: Color,
@@ -337,6 +370,7 @@ struct EditProfileView: View {
         .clipShape(RoundedRectangle(cornerRadius: HomeCrewTheme.cornerRadius))
     }
 
+    // Reusable row for settings with toggle
     private func toggleRow(
         icon: String,
         iconColor: Color,
