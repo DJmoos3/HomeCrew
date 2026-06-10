@@ -136,6 +136,12 @@ final class HouseholdRepository {
         guard let userDocument = snapshot.documents.first else {
             throw URLError(.cannotFindHost)
         }
+        let data = userDocument.data()
+        let existingHouseholdId = data["householdId"] as? String
+
+        if let existingHouseholdId, !existingHouseholdId.isEmpty {
+            throw HouseholdError.userAlreadyInHousehold
+        }
 
         let userId = userDocument.documentID
 
@@ -150,5 +156,16 @@ final class HouseholdRepository {
             .updateData([
                 "householdId": householdId
             ])
+    }
+    
+    enum HouseholdError: LocalizedError {
+        case userAlreadyInHousehold
+
+        var errorDescription: String? {
+            switch self {
+            case .userAlreadyInHousehold:
+                return "User is already in a household.\nThey must leave before joining a new one."
+            }
+        }
     }
 }

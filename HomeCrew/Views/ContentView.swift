@@ -20,7 +20,7 @@ struct ContentView: View {
 //            }
 //            
 //            Tab("Chat", systemImage: "bubble.right") {
-//                ChatView()
+//                ChatListView()
 //            }
 //            
 //            Tab("Profile", systemImage: "person.crop.circle") {
