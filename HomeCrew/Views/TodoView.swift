@@ -18,6 +18,8 @@ struct TodoView: View {
     
     @State private var showSuccess: Bool = false
     
+    @State private var selectedDate: Date = Date()
+    
     
     enum TaskTab {
         case myTasks
@@ -57,9 +59,19 @@ struct TodoView: View {
 
         return "\(completed)/\(tasksForDay.count)"
     }
+    //Tasks for selected day
+    private var selectedDayTasks: [HouseholdTask] {
+        let calendar = Calendar.current
+        
+        return viewModel.tasks.filter {
+            calendar.isDate($0.dueDate, inSameDayAs: selectedDate)
+        }
+        
+    }
     
     var body: some View {
             VStack {
+                //Header
                 HStack {
                     VStack(alignment: .leading) {
                         Text(
@@ -107,7 +119,7 @@ struct TodoView: View {
                     }
                 }
                 .padding(.bottom)
-
+             
                 HStack {
                     Button {
                         selectedTab = .myTasks
@@ -155,11 +167,41 @@ struct TodoView: View {
                         .padding(4)
                         .frame(maxWidth: .infinity)
                         .background(RoundedRectangle(cornerRadius: 12)
-                            .foregroundStyle(Calendar.current.isDateInToday(currentWeek[index]) ? HomeCrewTheme.primaryPurple : HomeCrewTheme.cardBackground))
-                        .foregroundStyle(Calendar.current.isDateInToday(currentWeek[index]) ? .white : HomeCrewTheme.textPrimary)
+                                    
+                            .foregroundStyle(Calendar.current.isDateInToday(currentWeek[index]) ? HomeCrewTheme.primaryPurple : HomeCrewTheme.cardBackground)) // .foregroundStyle(Calendar.current.isDateInToday(currentWeek[index]) ? .white : HomeCrewTheme.textPrimary)
+                            .foregroundStyle(Calendar.current.isDate(currentWeek[index], inSameDayAs: selectedDate) ? HomeCrewTheme.primaryPurple : HomeCrewTheme.cardBackground)
+                       
                         .shadow(
                             color: Calendar.current.isDateInToday(currentWeek[index]) ? HomeCrewTheme.primaryPurple.opacity(0.25) : .clear, radius: 6, x: 0, y: 4
                         )
+                        //for each day becomes selectablr
+                        .onTapGesture {
+                            selectedDate = currentWeek[index]
+                        }
+                    }
+                }
+                .padding(.bottom)
+                
+                //For selected date
+                VStack(alignment: .leading, spacing: 12) {
+                    Text(selectedDate.formatted(date: .abbreviated, time: .omitted))
+                        .font(.headline)
+                    if selectedDayTasks.isEmpty {
+                        Text("No tasks for this day")
+                            .foregroundStyle(.secondary)
+                    }else {
+                        ForEach(selectedDayTasks) { task in
+                            HStack {
+                                Image(systemName: task.lastCompleted != nil ? "checkmark.circle.fill": "ci")
+                                
+                                Text(task.title)
+                                
+                                Spacer()
+                            }
+                            .padding()
+                            .background(HomeCrewTheme.cardBackground)
+                            .cornerRadius(12)
+                        }
                     }
                 }
                 .padding(.bottom)
