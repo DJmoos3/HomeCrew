@@ -123,11 +123,11 @@ struct ProfileView: View {
                             Text("Household")
                                 .font(.headline)
                                 .foregroundStyle(HomeCrewTheme.textPrimary)
-
+                            
                             Text(
                                 householdViewModel.householdName.isEmpty
-                                    ? "No household yet"
-                                    : householdViewModel.householdName
+                                ? "No household yet"
+                                : householdViewModel.householdName
                             )
                             .foregroundStyle(HomeCrewTheme.textPrimary)
                             .frame(maxWidth: .infinity, alignment: .leading)
@@ -138,17 +138,17 @@ struct ProfileView: View {
                                     cornerRadius: HomeCrewTheme.cornerRadius
                                 )
                             )
-
-                            NavigationLink {
-                                CreateHouseholdView()
-                                    .environment(authViewModel)
-                            } label: {
-                                Text("Create / Join Household")
-                                    .fontWeight(.semibold)
-                                    .foregroundStyle(
-                                        HomeCrewTheme.primaryPurple
-                                    )
-                                    .frame(maxWidth: .infinity)
+                            
+                            if authViewModel.currentUser?.householdId == nil || authViewModel.currentUser?.householdId?.isEmpty == true {
+                                NavigationLink {
+                                    CreateHouseholdView()
+                                        .environment(authViewModel)
+                                } label: {
+                                    Text("Create / Join Household")
+                                        .fontWeight(.semibold)
+                                        .foregroundStyle(HomeCrewTheme.primaryPurple)
+                                        .frame(maxWidth: .infinity)
+                                }
                             }
                         }
 
@@ -248,6 +248,14 @@ struct ProfileView: View {
                     }
                 }
             }
+        }
+        .alert("Error", isPresented: Binding(
+            get: { householdViewModel.errorMessage != nil },
+            set: { if !$0 { householdViewModel.errorMessage = nil } }
+        )) {
+            Button("OK", role: .cancel) {}
+        } message: {
+            Text(householdViewModel.errorMessage ?? "")
         }
     }
 }
