@@ -20,7 +20,7 @@ struct HouseholdTask: Codable, Identifiable {
     
     var dueDate: Date
     
-    var completed: Bool = false
+    var lastCompleted: Date?
     var createdAt: Date = Date()
     var recurrence: TaskRecurrence = .once
 }

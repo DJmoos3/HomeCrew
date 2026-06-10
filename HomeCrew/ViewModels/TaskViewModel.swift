@@ -16,6 +16,21 @@ enum TaskRecurrence: String, Codable{
     case everyOtherWeek
     case monthly
     
+    var displayName: String {
+            switch self {
+            case .once:
+                return "Once"
+            case .daily:
+                return "Daily"
+            case .weekly:
+                return "Weekly"
+            case .everyOtherWeek:
+                return "Every Other Week"
+            case .monthly:
+                return "Monthly"
+            }
+        }
+    
 }
 
 @Observable
@@ -85,17 +100,13 @@ final class TaskViewModel {
         recurrence: TaskRecurrence = .once
         
     ) async {
-        print("Createtask called")
-
-
         isLoading = true
         defer { isLoading = false }
 
         do {
             let user = try authRepository.getUser()
             print("got user", user.uid)
-
-
+            
             try await repository.createTask(
                 title: title,
                 description: description,
@@ -105,53 +116,74 @@ final class TaskViewModel {
                 dueDate: dueDate,
                 recurrence: recurrence
             )
-            print("🔥 Firestore write success")
             await fetchTasks(householdID: householdID)
 
         } catch {
-            print("🔥 Firestore write failed", error)
             errorMessage = error.localizedDescription
         }
     }
+    
+    func isTaskActive(_ task: HouseholdTask) -> Bool {
+        let calendar = Calendar.current
 
-    //Toggle completion
+        switch task.recurrence {
+
+        case .once:
+            return task.lastCompleted == nil
+
+        case .daily:
+            return !calendar.isDateInToday(
+                task.lastCompleted ?? .distantPast)
+
+        case .weekly:
+            return !calendar.isDate(
+                task.lastCompleted ?? .distantPast,
+                equalTo: Date(),
+                toGranularity: .weekOfYear)
+
+        case .everyOtherWeek:
+            let weeks = calendar.dateComponents(
+                [.weekOfYear],
+                from: task.lastCompleted ?? .distantPast,
+                to: Date()
+                ).weekOfYear ?? 0
+                return weeks >= 2
+
+        case .monthly:
+            return !calendar.isDate(
+                task.lastCompleted ?? .distantPast,
+                equalTo: Date(),
+                toGranularity: .month)
+        }
+    }
+    
     func toggleTask(_ task: HouseholdTask) async {
         guard let id = task.id else { return }
-        
+        guard isTaskActive(task) else { return }
 
         do {
-            if task.recurrence == .once {
-                try await repository.toggleTaskCompletion(
-                    taskID: id,
-                    completed: !task.completed
-                )
-            }
+            let now = Date()
             
+            let newDate = nextDueDate(from: task.dueDate, recurrence: task.recurrence)
+
+            try await repository.db
+                .collection("tasks")
+                .document(id)
+                .updateData([
+                    "dueDate": newDate,
+                    "lastCompleted": now
+                ])
 
             if let index = tasks.firstIndex(where: { $0.id == id }) {
-                tasks[index].completed.toggle()
-            }else {
-                
-                //recurring task → move forward instead of completing
-                let newDate = nextDueDate(
-                    from: task.dueDate,
-                    recurrence: task.recurrence
-                )
-                 try await repository.db
-                     .collection("tasks")
-                     .document(id)
-                     .updateData(["dueDate": newDate])
-
-                            if let index = tasks.firstIndex(where: { $0.id == id }) {
-                                tasks[index].dueDate = newDate
-                            }
-                        }
-
+                tasks[index].dueDate = newDate
+                tasks[index].lastCompleted = now
+            }
 
         } catch {
             errorMessage = error.localizedDescription
         }
     }
+    
     private func nextDueDate(from date: Date, recurrence: TaskRecurrence) -> Date {
         let calendar = Calendar.current
 

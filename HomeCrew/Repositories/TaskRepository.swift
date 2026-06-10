@@ -30,7 +30,6 @@ final class TaskRepository {
             assignedToUserID: assignedToUserID,
             createdByUserID: createdByUserID,
             dueDate: dueDate,
-            completed: false,
             createdAt: Date(),
             recurrence: recurrence
         )
@@ -46,20 +45,20 @@ final class TaskRepository {
             .whereField("householdID", isEqualTo: householdID)
             .getDocuments()
 
-        return try snapshot.documents.compactMap {doc in
+        return snapshot.documents.compactMap {doc in
             try? doc.data(as: HouseholdTask.self)
         }
     }
 
-    //TOGGLE TASK
-    func toggleTaskCompletion(taskID: String, completed: Bool) async throws {
-
-        try await db.collection("tasks")
-            .document(taskID)
-            .updateData([
-                "completed": completed
-            ])
-    }
+////    //TOGGLE TASK
+//    func toggleTaskCompletion(taskID: String, completed: Bool) async throws {
+//
+//        try await db.collection("tasks")
+//            .document(taskID)
+//            .updateData([
+//                "completed": completed
+//            ])
+//    }
 
     //ASSIGN TASK
     func assignTask(taskID: String, assignedToUserID: String?) async throws {

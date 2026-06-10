@@ -14,18 +14,16 @@ struct MyTasksView: View {
 
     private var myTask: [HouseholdTask] {
         guard let currentUserId = viewModel.currentUserId else { return [] }
-        return viewModel.tasks.filter { $0.assignedToUserID == currentUserId }
+        
+        return viewModel.tasks
+            .filter { $0.assignedToUserID == currentUserId }
             .sorted {
-                        if $0.completed != $1.completed {
-                            return !$0.completed
-                        }
-
-                        return $0.dueDate > $1.dueDate
+                return $0.dueDate > $1.dueDate
                     }
     }
 
     private var nextTask: HouseholdTask? {
-        myTask.first(where: { !$0.completed })
+        myTask.first(where: { viewModel.isTaskActive($0) })
     }
 
     var body: some View {
@@ -78,7 +76,7 @@ struct MyTasksView: View {
                 .padding(.bottom)
             }
 
-            // TASK LIST
+            //Task list
             VStack(alignment: .leading) {
                 Text("My Tasks")
 
@@ -86,9 +84,8 @@ struct MyTasksView: View {
                     ForEach(myTask) { task in
                         HStack {
 
-                            Image(systemName: task.completed
-                                  ? "checkmark.circle.fill"
-                                  : "circle")
+                            Image(systemName: viewModel.isTaskActive(task) ? "circle": "checkmark.circle.fill"
+                                  )
                                 .font(.system(size: 34))
                                 .foregroundStyle(HomeCrewTheme.primaryPurple)
 
@@ -96,8 +93,11 @@ struct MyTasksView: View {
                                 Text(task.title)
 
                                 HStack {
-                                    Image(systemName: "clock")
-                                    Text(task.dueDate.formatted(date: .abbreviated, time: .shortened))
+                                    Text(task.recurrence.displayName)
+                                    if task.recurrence != .once {
+                                        Image(systemName: "repeat")
+                                    }
+                                    
                                 }
                                 .font(.caption)
                             }
@@ -119,6 +119,17 @@ struct MyTasksView: View {
                         .onTapGesture {
                             Task {
                                 await viewModel.toggleTask(task)
+                            }
+                        }
+                    }
+                    .onDelete { indexSet in
+                        Task {
+                            for index in indexSet {
+                                let task = myTask[index]
+                                
+                                if let id = task.id {
+                                    await viewModel.deleteTask(taskID: id, householdID: householdID)
+                                }
                             }
                         }
                     }

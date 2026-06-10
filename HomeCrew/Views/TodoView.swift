@@ -29,7 +29,7 @@ struct TodoView: View {
     private var tasksLeftCount: Int {
         guard let currentUserId = viewModel.currentUserId else { return 0 }
         return viewModel.tasks.filter{
-            !$0.completed &&
+            viewModel.isTaskActive($0) &&
             $0.assignedToUserID == currentUserId
         }.count
     }
@@ -42,6 +42,7 @@ struct TodoView: View {
             calendar.date(byAdding: .day, value: $0, to: startOfWeek)
         }
     }
+    
     //Show completed total tasks for each day
     private func taskCount(for date: Date) -> String {
         let calendar = Calendar.current
@@ -50,7 +51,9 @@ struct TodoView: View {
             calendar.isDate($0.dueDate, inSameDayAs: date)
         }
 
-        let completed = tasksForDay.filter(\.completed).count
+        let completed = tasksForDay.filter{
+            !viewModel.isTaskActive($0)
+        }.count
 
         return "\(completed)/\(tasksForDay.count)"
     }
