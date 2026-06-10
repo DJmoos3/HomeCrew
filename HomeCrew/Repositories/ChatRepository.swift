@@ -11,8 +11,11 @@ import FirebaseFirestore
 final class ChatRepository {
     private lazy var db = Firestore.firestore()
 
-    func fetchChats(householdId: String, currentUserId: String) async throws -> [Chat] {
-        let snapshot = try await db
+    func fetchChats(householdId: String, currentUserId: String) async throws
+        -> [Chat]
+    {
+        let snapshot =
+            try await db
             .collection("households")
             .document(householdId)
             .collection("chats")
@@ -24,8 +27,11 @@ final class ChatRepository {
         }
     }
 
-    func fetchMessages(householdId: String, chatId: String) async throws -> [Message] {
-        let snapshot = try await db
+    func fetchMessages(householdId: String, chatId: String) async throws
+        -> [Message]
+    {
+        let snapshot =
+            try await db
             .collection("households")
             .document(householdId)
             .collection("chats")
@@ -52,6 +58,10 @@ final class ChatRepository {
             .getDocuments()
 
         if let existingChat = snapshot.documents.first {
+            try await existingChat.reference.updateData([
+                "memberIds": memberIds
+            ])
+
             return existingChat.documentID
         }
 
@@ -61,7 +71,9 @@ final class ChatRepository {
             memberIds: memberIds,
             createdAt: Date(),
             lastMessage: nil,
-            lastMessageAt: nil
+            lastMessageAt: nil,
+            lastMessageSenderId: nil,
+            lastReadAtByUser: nil
         )
 
         let ref = try db
@@ -135,7 +147,72 @@ final class ChatRepository {
 
         try await chatRef.updateData([
             "lastMessage": text,
-            "lastMessageAt": Date()
+            "lastMessageAt": Date(),
+            "lastMessageSenderId": senderId,
+            "lastReadAtByUser.\(senderId)": Date()
         ])
+    }
+
+    func listenToMessages(
+        householdId: String,
+        chatId: String,
+        onChange: @escaping ([Message]) -> Void
+    ) -> ListenerRegistration {
+        db.collection("households")
+            .document(householdId)
+            .collection("chats")
+            .document(chatId)
+            .collection("messages")
+            .order(by: "createdAt")
+            .addSnapshotListener { snapshot, error in
+                guard let documents = snapshot?.documents else {
+                    onChange([])
+                    return
+                }
+
+                let messages = documents.compactMap {
+                    try? $0.data(as: Message.self)
+                }
+
+                onChange(messages)
+            }
+    }
+
+    func listenToChats(
+        householdId: String,
+        currentUserId: String,
+        onChange: @escaping ([Chat]) -> Void
+    ) -> ListenerRegistration {
+        db.collection("households")
+            .document(householdId)
+            .collection("chats")
+            .whereField("memberIds", arrayContains: currentUserId)
+            .addSnapshotListener { snapshot, error in
+                guard let documents = snapshot?.documents else {
+                    onChange([])
+                    return
+                }
+
+                let chats = documents.compactMap {
+                    try? $0.data(as: Chat.self)
+                }
+
+                onChange(chats)
+            }
+    }
+
+    func markChatAsRead(
+        householdId: String,
+        chatId: String,
+        userId: String
+    ) async throws {
+        try await db
+            .collection("households")
+            .document(householdId)
+            .collection("chats")
+            .document(chatId)
+            .updateData([
+                "lastReadAtByUser.\(userId)": Date()
+            ])
     }
 }
