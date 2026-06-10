@@ -162,6 +162,27 @@ final class HouseholdViewModel {
         } catch {
             errorMessage = error.localizedDescription
         }
+    }
 
+    func updateHouseholdName(householdId: String, newName: String) async {
+        errorMessage = nil
+
+        let trimmedName = newName.trimmingCharacters(in: .whitespacesAndNewlines)
+
+        guard !trimmedName.isEmpty else {
+            errorMessage = "Please enter a household name"
+            return
+        }
+
+        do {
+            try await repository.updateHouseholdName(
+                householdId: householdId,
+                name: trimmedName
+            )
+
+            householdName = trimmedName
+        } catch {
+            errorMessage = error.localizedDescription
+        }
     }
 }
