@@ -9,23 +9,33 @@ import SwiftUI
 
 struct EditProfileView: View {
 
-    // Temporary data for the profile design
-    @State private var fullName = "Anders Anderson"
-    @State private var householdName = "The Andersons"
     @Environment(AuthViewModel.self) private var authViewModel
+    @State private var householdViewModel = HouseholdViewModel()
+
     @AppStorage("darkModeEnabled") private var darkMode = false
     @AppStorage("taskReminderEnabled") private var taskReminder = true
-    
+
     @State private var editedFullName = ""
     @State private var showNameEditor = false
+
+    @State private var editedHouseholdName = ""
+    @State private var showHouseholdNameEditor = false
+
     @State private var showSaveAlert = false
 
     private var displayName: String {
         authViewModel.currentUser?.username ?? "No name set"
     }
 
-    var body: some View {
+    private var displayHouseholdName: String {
+        if householdViewModel.householdName.isEmpty {
+            return "No household set"
+        }
 
+        return householdViewModel.householdName
+    }
+
+    var body: some View {
         ScrollView {
             VStack(spacing: 24) {
 
@@ -49,13 +59,19 @@ struct EditProfileView: View {
 
                 sectionTitle("Household Settings")
 
-                profileRow(
-                    icon: "house.fill",
-                    iconColor: HomeCrewTheme.darkBlue,
-                    title: "Household Name",
-                    subtitle: householdName,
-                    showEditIcon: true
-                )
+                Button {
+                    editedHouseholdName = displayHouseholdName
+                    showHouseholdNameEditor = true
+                } label: {
+                    profileRow(
+                        icon: "house.fill",
+                        iconColor: HomeCrewTheme.darkBlue,
+                        title: "Household Name",
+                        subtitle: displayHouseholdName,
+                        showEditIcon: true
+                    )
+                }
+                .buttonStyle(.plain)
 
                 profileRow(
                     icon: "rectangle.portrait.and.arrow.right",
@@ -75,7 +91,6 @@ struct EditProfileView: View {
 
                 sectionTitle("Preferences")
 
-                // Task reminder setting
                 VStack(alignment: .leading, spacing: 8) {
                     toggleRow(
                         icon: "bell.fill",
@@ -100,64 +115,17 @@ struct EditProfileView: View {
                     title: "Dark Mode",
                     isOn: $darkMode
                 )
-
-                logoutButton
             }
             .padding()
         }
         .background(HomeCrewTheme.background)
         .navigationTitle("Edit Profile")
         .navigationBarTitleDisplayMode(.inline)
-        .toolbar {
-            ToolbarItem(placement: .topBarTrailing) {
-                Button("Save") {
-                  
-                    showSaveAlert = true
-                }
-                .font(.headline)
-                .foregroundStyle(HomeCrewTheme.primaryPurple)
-            }
-        }
         .sheet(isPresented: $showNameEditor) {
-            NavigationStack {
-                VStack(spacing: 20) {
-                    TextField("Full name", text: $editedFullName)
-                        .padding()
-                        .background(HomeCrewTheme.cardBackground)
-                        .foregroundStyle(HomeCrewTheme.textPrimary)
-                        .clipShape(
-                            RoundedRectangle(
-                                cornerRadius: HomeCrewTheme.cornerRadius
-                            )
-                        )
-                        .padding(.horizontal)
-
-                    Spacer()
-                }
-                .padding(.top)
-                .background(HomeCrewTheme.background)
-                .navigationTitle("Edit Name")
-                .navigationBarTitleDisplayMode(.inline)
-                .toolbar {
-                    ToolbarItem(placement: .topBarLeading) {
-                        Button("Cancel") {
-                            editedFullName = displayName
-                            showNameEditor = false
-                        }
-                    }
-
-                    ToolbarItem(placement: .topBarTrailing) {
-                        Button("Save") {
-                            Task {
-                                await authViewModel.updateUsername(editedFullName)
-                                editedFullName = displayName
-                                showNameEditor = false
-                                showSaveAlert = true
-                            }
-                        }
-                    }
-                }
-            }
+            editNameSheet
+        }
+        .sheet(isPresented: $showHouseholdNameEditor) {
+            editHouseholdNameSheet
         }
         .alert("Profile updated", isPresented: $showSaveAlert) {
             Button("OK", role: .cancel) { }
@@ -166,10 +134,130 @@ struct EditProfileView: View {
         }
         .onAppear {
             editedFullName = displayName
+            loadHouseholdName()
         }
     }
 
-    // MARK: - Profile Header
+    private var editNameSheet: some View {
+        NavigationStack {
+            VStack(spacing: 20) {
+                TextField("Full name", text: $editedFullName)
+                    .padding()
+                    .background(HomeCrewTheme.cardBackground)
+                    .foregroundStyle(HomeCrewTheme.textPrimary)
+                    .clipShape(
+                        RoundedRectangle(
+                            cornerRadius: HomeCrewTheme.cornerRadius
+                        )
+                    )
+                    .padding(.horizontal)
+
+                Spacer()
+            }
+            .padding(.top)
+            .background(HomeCrewTheme.background)
+            .navigationTitle("Edit Name")
+            .navigationBarTitleDisplayMode(.inline)
+            .toolbar {
+                ToolbarItem(placement: .topBarLeading) {
+                    Button("Cancel") {
+                        editedFullName = displayName
+                        showNameEditor = false
+                    }
+                }
+
+                ToolbarItem(placement: .topBarTrailing) {
+                    Button("Save") {
+                        Task {
+                            await authViewModel.updateUsername(editedFullName)
+                            editedFullName = displayName
+                            showNameEditor = false
+                            showSaveAlert = true
+                        }
+                    }
+                }
+            }
+        }
+    }
+
+    private var editHouseholdNameSheet: some View {
+        NavigationStack {
+            VStack(spacing: 20) {
+                TextField("Household name", text: $editedHouseholdName)
+                    .padding()
+                    .background(HomeCrewTheme.cardBackground)
+                    .foregroundStyle(HomeCrewTheme.textPrimary)
+                    .clipShape(
+                        RoundedRectangle(
+                            cornerRadius: HomeCrewTheme.cornerRadius
+                        )
+                    )
+                    .padding(.horizontal)
+
+                if let errorMessage = householdViewModel.errorMessage {
+                    Text(errorMessage)
+                        .font(.caption)
+                        .foregroundStyle(.red)
+                        .padding(.horizontal)
+                }
+
+                Spacer()
+            }
+            .padding(.top)
+            .background(HomeCrewTheme.background)
+            .navigationTitle("Edit Household")
+            .navigationBarTitleDisplayMode(.inline)
+            .toolbar {
+                ToolbarItem(placement: .topBarLeading) {
+                    Button("Cancel") {
+                        editedHouseholdName = displayHouseholdName
+                        showHouseholdNameEditor = false
+                    }
+                }
+
+                ToolbarItem(placement: .topBarTrailing) {
+                    Button("Save") {
+                        saveHouseholdName()
+                    }
+                }
+            }
+        }
+    }
+
+    private func loadHouseholdName() {
+        guard let householdId = authViewModel.currentUser?.householdId else {
+            return
+        }
+
+        Task {
+            await householdViewModel.fetchHouseholdMembers(
+                householdId: householdId
+            )
+
+            editedHouseholdName = displayHouseholdName
+        }
+    }
+
+    private func saveHouseholdName() {
+        guard let householdId = authViewModel.currentUser?.householdId else {
+            householdViewModel.errorMessage = "Could not find household"
+            return
+        }
+
+        Task {
+            await householdViewModel.updateHouseholdName(
+                householdId: householdId,
+                newName: editedHouseholdName
+            )
+
+            if householdViewModel.errorMessage == nil {
+                editedHouseholdName = displayHouseholdName
+                showHouseholdNameEditor = false
+                showSaveAlert = true
+            }
+        }
+    }
+
     private var profileHeader: some View {
         VStack(spacing: 10) {
             ZStack {
@@ -199,7 +287,6 @@ struct EditProfileView: View {
         .padding(.top, 20)
     }
 
-    // MARK: - Section Title
     private func sectionTitle(_ title: String) -> some View {
         HStack {
             Text(title)
@@ -211,7 +298,6 @@ struct EditProfileView: View {
         }
     }
 
-    // MARK: - Profile Row
     private func profileRow(
         icon: String,
         iconColor: Color,
@@ -251,7 +337,6 @@ struct EditProfileView: View {
         .clipShape(RoundedRectangle(cornerRadius: HomeCrewTheme.cornerRadius))
     }
 
-    // MARK: - Toggle Row
     private func toggleRow(
         icon: String,
         iconColor: Color,
@@ -278,33 +363,6 @@ struct EditProfileView: View {
         .frame(minHeight: HomeCrewTheme.cardHeight)
         .background(HomeCrewTheme.cardBackground)
         .clipShape(RoundedRectangle(cornerRadius: HomeCrewTheme.cornerRadius))
-    }
-
-    // MARK: - Log Out Button
-    private var logoutButton: some View {
-        Button {
-            // Logout function will be added later
-        } label: {
-            HStack {
-                Image(systemName: "rectangle.portrait.and.arrow.right")
-                    .font(.title2)
-
-                Spacer()
-
-                Text("Log Out")
-                    .font(.headline)
-
-                Spacer()
-            }
-            .padding()
-            .frame(height: HomeCrewTheme.cardHeight)
-            .background(HomeCrewTheme.cardBackground)
-            .foregroundStyle(HomeCrewTheme.darkBlue)
-            .clipShape(
-                RoundedRectangle(cornerRadius: HomeCrewTheme.cornerRadius)
-            )
-        }
-        .padding(.top, 16)
     }
 }
 

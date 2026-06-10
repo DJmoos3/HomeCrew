@@ -31,6 +31,16 @@ final class HouseholdRepository {
             .getDocument(as: Household.self)
     }
 
+    //Update Household name in Firestore (omar)
+    
+    func updateHouseholdName(householdId: String, name: String) async throws {
+        try await db.collection("households")
+            .document(householdId)
+            .updateData([
+                "name": name
+            ])
+    }
+    
     func fetchMembers(memberIds: [String]) async throws -> [Member] {
         var members: [Member] = []
 
