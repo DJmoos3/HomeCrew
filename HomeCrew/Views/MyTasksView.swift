@@ -53,7 +53,7 @@ struct MyTasksView: View {
                         }
                     }
 
-                    Image(systemName: "fork.knife")
+                    Image(systemName: "square.stack.3d.up")
                         .padding()
                         .frame(width: 40, height: 40)
                         .foregroundStyle(HomeCrewTheme.darkBlue)
@@ -73,7 +73,7 @@ struct MyTasksView: View {
 
             // TASK LIST
             VStack(alignment: .leading) {
-                Text("Today's Tasks")
+                Text("My Tasks")
 
                 List {
                     ForEach(myTask) { task in
@@ -97,7 +97,7 @@ struct MyTasksView: View {
 
                             Spacer()
 
-                            Image(systemName: "fork.knife")
+                            Image(systemName: "square.stack.3d.up")
                                 .padding()
                                 .frame(width: 40, height: 40)
                                 .background(

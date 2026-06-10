@@ -13,7 +13,7 @@ struct HouseholdTasksView: View {
     
     var body: some View {
         VStack(alignment: .leading) {
-            Text("Today's Tasks")
+            Text("Household Tasks")
                 .font(.headline)
             
             if viewModel.isLoading {
@@ -38,7 +38,7 @@ struct HouseholdTasksView: View {
 
                             Spacer()
 
-                            Image(systemName: "fork.knife")
+                            Image(systemName: "square.stack.3d.up")
                                 .padding()
                                 .frame(width: 40, height: 40)
                                 .background(
