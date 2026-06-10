@@ -15,6 +15,13 @@ struct MyTasksView: View {
     private var myTask: [HouseholdTask] {
         guard let currentUserId = viewModel.currentUserId else { return [] }
         return viewModel.tasks.filter { $0.assignedToUserID == currentUserId }
+            .sorted {
+                        if $0.completed != $1.completed {
+                            return !$0.completed
+                        }
+
+                        return $0.dueDate > $1.dueDate
+                    }
     }
 
     private var nextTask: HouseholdTask? {

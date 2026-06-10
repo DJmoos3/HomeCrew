@@ -7,6 +7,16 @@
 
 import Foundation
 import Observation
+internal import FirebaseFirestoreInternal
+
+enum TaskRecurrence: String, Codable{
+    case once
+    case daily
+    case weekly
+    case everyOtherWeek
+    case monthly
+    
+}
 
 @Observable
 final class TaskViewModel {
@@ -71,7 +81,8 @@ final class TaskViewModel {
         description: String = "",
         householdID: String,
         assignedToUserID: String?,
-        dueDate: Date
+        dueDate: Date,
+        recurrence: TaskRecurrence = .once
         
     ) async {
         print("Createtask called")
@@ -91,7 +102,8 @@ final class TaskViewModel {
                 householdID: householdID,
                 assignedToUserID: assignedToUserID,
                 createdByUserID: user.uid,
-                dueDate: dueDate
+                dueDate: dueDate,
+                recurrence: recurrence
             )
             print("🔥 Firestore write success")
             await fetchTasks(householdID: householdID)
@@ -105,19 +117,59 @@ final class TaskViewModel {
     //Toggle completion
     func toggleTask(_ task: HouseholdTask) async {
         guard let id = task.id else { return }
+        
 
         do {
-            try await repository.toggleTaskCompletion(
-                taskID: id,
-                completed: !task.completed
-            )
+            if task.recurrence == .once {
+                try await repository.toggleTaskCompletion(
+                    taskID: id,
+                    completed: !task.completed
+                )
+            }
+            
 
             if let index = tasks.firstIndex(where: { $0.id == id }) {
                 tasks[index].completed.toggle()
-            }
+            }else {
+                
+                //recurring task → move forward instead of completing
+                let newDate = nextDueDate(
+                    from: task.dueDate,
+                    recurrence: task.recurrence
+                )
+                 try await repository.db
+                     .collection("tasks")
+                     .document(id)
+                     .updateData(["dueDate": newDate])
+
+                            if let index = tasks.firstIndex(where: { $0.id == id }) {
+                                tasks[index].dueDate = newDate
+                            }
+                        }
+
 
         } catch {
             errorMessage = error.localizedDescription
+        }
+    }
+    private func nextDueDate(from date: Date, recurrence: TaskRecurrence) -> Date {
+        let calendar = Calendar.current
+
+        switch recurrence {
+        case .once:
+            return date
+
+        case .daily:
+            return calendar.date(byAdding: .day, value: 1, to: date)!
+
+        case .weekly:
+            return calendar.date(byAdding: .weekOfYear, value: 1, to: date)!
+
+        case .everyOtherWeek:
+            return calendar.date(byAdding: .weekOfYear, value: 2, to: date)!
+
+        case .monthly:
+            return calendar.date(byAdding: .month, value: 1, to: date)!
         }
     }
     

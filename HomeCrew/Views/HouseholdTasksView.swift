@@ -21,7 +21,13 @@ struct HouseholdTasksView: View {
             }
             ScrollView {
                 LazyVStack(spacing: 12) {
-                    ForEach(viewModel.tasks) { task in
+                    ForEach(viewModel.tasks.sorted{
+                        if $0.completed != $1.completed {
+                            return !$0.completed
+                        }
+                        return $0.dueDate > $1.dueDate
+                    }
+                    ) { task in
                         HStack {
                             Image(systemName: task.completed ?  "checkmark.circle.fill" : "circle")
                                 .font(.system(size: 34))

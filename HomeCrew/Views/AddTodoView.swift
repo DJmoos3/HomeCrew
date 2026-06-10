@@ -213,7 +213,9 @@ struct AddTodoView: View {
                         description: "",
                         householdID: householdID,
                         assignedToUserID: selectedMemberID,
-                        dueDate: buildDueDate()
+                        dueDate: buildDueDate(),
+                        recurrence: mapRepeat(selectedRepeat)
+                    
                     )
                     
                     await viewModel.fetchTasks(householdID: householdID)
@@ -239,6 +241,15 @@ struct AddTodoView: View {
         }
         .padding()
         .background(HomeCrewTheme.background)
+    }
+    private func mapRepeat(_ value: String) -> TaskRecurrence {
+        switch value {
+        case "Daily": return .daily
+        case "Weekly": return .weekly
+        case "Every Other Week": return .everyOtherWeek
+        case "Monthly": return .monthly
+        default: return .once
+        }
     }
     private func buildDueDate() -> Date {
             let calendar = Calendar.current
