@@ -36,17 +36,40 @@ struct EditProfileView: View {
         authViewModel.currentUser?.username ?? "No name set"
     }
 
-    // First letter for the profile avatar
-    private var avatarLetter: String {
+    // Initials for the profile avatar.
+    // This uses the same idea as the chat avatar.
+    private var avatarInitials: String {
         let name = displayName.trimmingCharacters(in: .whitespacesAndNewlines)
+        let parts = name.split(separator: " ")
 
-        if let firstLetter = name.first {
-            return String(firstLetter).uppercased()
-        }
+        let initials = parts
+            .prefix(2)
+            .compactMap { $0.first }
+            .map { String($0).uppercased() }
+            .joined()
 
-        return "?"
+        return initials.isEmpty ? "?" : initials
     }
 
+    // Color for the profile avatar.
+    // The color is based on the user id, so it stays the same for the same user.
+    private var avatarColor: Color {
+        let colors: [Color] = [
+            .purple,
+            .blue,
+            .green,
+            .orange,
+            .pink,
+            .teal,
+            .indigo
+        ]
+
+        let userId = authViewModel.currentUser?.id ?? displayName
+        let value = abs(userId.hashValue)
+
+        return colors[value % colors.count]
+    }
+    
     // Current household name
     private var displayHouseholdName: String {
         if householdViewModel.householdName.isEmpty {
@@ -304,22 +327,13 @@ struct EditProfileView: View {
         VStack(spacing: 10) {
             ZStack {
                 Circle()
-                    .fill(HomeCrewTheme.primaryPurple)
+                    .fill(avatarColor)
                     .frame(width: 120, height: 120)
 
-                Text(avatarLetter)
-                    .font(.system(size: 48, weight: .bold))
+                // Avatar with initials, similar to chat avatar
+                Text(avatarInitials)
+                    .font(.system(size: 42, weight: .bold))
                     .foregroundStyle(.white)
-
-                Image(systemName: "checkmark.square.fill")
-                    .font(.system(size: 32))
-                    .foregroundStyle(HomeCrewTheme.mintGreen)
-                    .background(
-                        Circle()
-                            .fill(HomeCrewTheme.background)
-                            .frame(width: 34, height: 34)
-                    )
-                    .offset(x: 38, y: 38)
             }
 
             Text("Manage your profile and household")
