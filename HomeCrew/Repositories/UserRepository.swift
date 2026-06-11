@@ -28,4 +28,11 @@ final class UserRepository {
             ])
 
         }
+    
+    // Delete user document from Firestore
+    func deleteUser(uid: String) async throws {
+        try await db.collection("users")
+            .document(uid)
+            .delete()
+    }
 }

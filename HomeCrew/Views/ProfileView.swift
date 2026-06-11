@@ -39,6 +39,42 @@ struct ProfileView: View {
     @State private var showInviteAlert = false
     @State private var showLogoutAlert = false
     @State private var inviteEmail = ""
+    
+    // Avatar view
+    private var displayName: String {
+        authViewModel.currentUser?.username ?? "User"
+    }
+
+    private var avatarInitials: String {
+        let name = displayName.trimmingCharacters(in: .whitespacesAndNewlines)
+        let parts = name.split(separator: " ")
+
+        let initials = parts
+            .prefix(2)
+            .compactMap { $0.first }
+            .map { String($0).uppercased() }
+            .joined()
+
+        return initials.isEmpty ? "?" : initials
+    }
+
+    private var avatarColor: Color {
+        let colors: [Color] = [
+            .purple,
+            .blue,
+            .green,
+            .orange,
+            .pink,
+            .teal,
+            .indigo
+        ]
+
+        let userId = authViewModel.currentUser?.id ?? displayName
+        let value = abs(userId.hashValue)
+
+        return colors[value % colors.count]
+    }
+    
 
     var body: some View {
         NavigationView {
@@ -82,24 +118,14 @@ struct ProfileView: View {
 
                         // Profile Section
                         HStack(alignment: .center, spacing: 20) {
-                            ZStack(alignment: .bottomTrailing) {
-                                Image(systemName: "person.crop.circle")
-                                    .resizable()
-                                    .scaledToFit()
-                                    .frame(width: 90, height: 90)
-                                    .foregroundStyle(
-                                        HomeCrewTheme.primaryPurple.opacity(
-                                            0.75
-                                        )
-                                    )
-                                Button(action: {}) {
-                                    Image(systemName: "plus")
+                            Circle()
+                                .fill(avatarColor)
+                                .frame(width: 90, height: 90)
+                                .overlay {
+                                    Text(avatarInitials)
+                                        .font(.system(size: 34, weight: .bold))
                                         .foregroundStyle(.white)
-                                        .padding(8)
-                                        .background(HomeCrewTheme.primaryPurple)
-                                        .clipShape(Circle())
                                 }
-                            }
 
                             VStack(alignment: .leading, spacing: 5) {
                                 Text(

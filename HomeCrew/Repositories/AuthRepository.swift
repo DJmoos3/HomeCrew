@@ -43,4 +43,16 @@ final class AuthRepository{
     func signOut() throws {
         try Auth.auth().signOut()
     }
+    // delete account from firebase 
+    func deleteCurrentUser() async throws {
+
+        guard let user = Auth.auth().currentUser else {
+
+            throw URLError(.badServerResponse)
+
+        }
+
+        try await user.delete()
+
+    }
 }

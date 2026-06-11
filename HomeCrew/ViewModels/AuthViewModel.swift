@@ -21,9 +21,12 @@ final class AuthViewModel {
     var isSignedIn: Bool = false
 
     private let userRepository: UserRepository
+    private let householdRepository: HouseholdRepository
+    
 
     init() {
         self.userRepository = UserRepository()
+        self.householdRepository = HouseholdRepository()
     }
 
     func checkExistingSession() {
@@ -141,6 +144,42 @@ final class AuthViewModel {
         } catch {
             errorMessage = error.localizedDescription
             print("Error updating username: \(error)")
+        }
+    }
+    
+    // Delete user account
+    func deleteAccount() async {
+        errorMessage = nil
+
+        guard let uid = Auth.auth().currentUser?.uid else {
+            errorMessage = "Could not find logged in user"
+            return
+        }
+
+        let householdId = currentUser?.householdId
+
+        do {
+            // First delete the account from Firebase Authentication.
+            // If Firebase requires recent login, the rest will not run.
+            try await AuthRepository.shared.deleteCurrentUser()
+
+            // Then remove the user from the household if the user has one.
+            if let householdId {
+                try await householdRepository.removeMember(
+                    householdId: householdId,
+                    userId: uid
+                )
+            }
+
+            // Then delete the user document from Firestore.
+            try await userRepository.deleteUser(uid: uid)
+
+            isSignedIn = false
+            currentUser = nil
+            clearFields()
+        } catch {
+            errorMessage = error.localizedDescription
+            print("Error deleting account: \(error)")
         }
     }
 }
