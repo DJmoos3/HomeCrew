@@ -10,6 +10,7 @@ import Foundation
 import Observation
 
 @Observable
+@MainActor
 final class HouseholdViewModel {
 
     var isLoading: Bool = false
@@ -20,16 +21,13 @@ final class HouseholdViewModel {
     var householdName: String = ""
     var inviteEmail = ""
 
-    private let repository: HouseholdRepository
-    private let authRepository: AuthRepository
+    private let repository = HouseholdRepository()
+    private let authRepository: AuthRepository = .shared
 
-    init(
-        repository: HouseholdRepository = HouseholdRepository(),
-        authRepository: AuthRepository = .shared
-    ) {
-        self.repository = repository
-        self.authRepository = authRepository
-    }
+//    init() {
+//        self.repository = HouseholdRepository()
+//        self.authRepository = .shared
+//    }
 
     func createHousehold(name: String) async {
         errorMessage = nil

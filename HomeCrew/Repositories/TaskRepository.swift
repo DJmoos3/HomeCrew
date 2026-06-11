@@ -10,7 +10,7 @@ import Foundation
 
 final class TaskRepository {
 
-    let db = Firestore.firestore()
+    private lazy var db = Firestore.firestore()
 
     //CREATE TASK
     func createTask(
@@ -60,6 +60,15 @@ final class TaskRepository {
 //            ])
 //    }
 
+    func completeTask(taskID: String, dueDate: Date, lastCompleted: Date) async throws {
+        try await db.collection("tasks")
+            .document(taskID)
+            .updateData([
+                "dueDate": dueDate,
+                "lastCompleted": lastCompleted
+            ])
+    }
+    
     //ASSIGN TASK
     func assignTask(taskID: String, assignedToUserID: String?) async throws {
 
