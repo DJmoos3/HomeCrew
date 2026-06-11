@@ -147,7 +147,7 @@ final class AuthViewModel {
         }
     }
     
-    // delete user account 
+    // Delete user account
     func deleteAccount() async {
         errorMessage = nil
 
@@ -159,6 +159,11 @@ final class AuthViewModel {
         let householdId = currentUser?.householdId
 
         do {
+            // First delete the account from Firebase Authentication.
+            // If Firebase requires recent login, the rest will not run.
+            try await AuthRepository.shared.deleteCurrentUser()
+
+            // Then remove the user from the household if the user has one.
             if let householdId {
                 try await householdRepository.removeMember(
                     householdId: householdId,
@@ -166,14 +171,15 @@ final class AuthViewModel {
                 )
             }
 
+            // Then delete the user document from Firestore.
             try await userRepository.deleteUser(uid: uid)
-            try await AuthRepository.shared.deleteCurrentUser()
 
             isSignedIn = false
             currentUser = nil
             clearFields()
         } catch {
             errorMessage = error.localizedDescription
+            print("Error deleting account: \(error)")
         }
     }
 }
