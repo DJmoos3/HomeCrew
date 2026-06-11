@@ -13,7 +13,7 @@ struct TodoView: View {
 
     @State private var showingSheet: Bool = false
     @State private var selectedTab: TaskTab = .myTasks
-    @State private var viewModel: TaskViewModel = .init()
+    @State private var taskViewModel = TaskViewModel()
 
     @State private var showSuccess: Bool = false
     @State private var selectedDate: Date = Date()
@@ -26,10 +26,10 @@ struct TodoView: View {
     private let days = ["MON", "TUE", "WED", "THU", "FRI", "SAT", "SUN"]
 
     private var tasksLeftCount: Int {
-        guard let currentUserId = viewModel.currentUserId else { return 0 }
+        guard let currentUserId = taskViewModel.currentUserId else { return 0 }
 
-        return viewModel.tasks.filter {
-            viewModel.isTaskActive($0) &&
+        return taskViewModel.tasks.filter {
+            taskViewModel.isTaskActive($0) &&
             $0.assignedToUserID == currentUserId
         }.count
     }
@@ -47,12 +47,12 @@ struct TodoView: View {
     private func taskCount(for date: Date) -> String {
         let calendar = Calendar.current
 
-        let tasksForDay = viewModel.tasks.filter {
+        let tasksForDay = taskViewModel.tasks.filter {
             calendar.isDate($0.dueDate, inSameDayAs: date)
         }
 
         let completed = tasksForDay.filter {
-            !viewModel.isTaskActive($0)
+            !taskViewModel.isTaskActive($0)
         }.count
 
         return "\(completed)/\(tasksForDay.count)"
@@ -62,7 +62,7 @@ struct TodoView: View {
     private var selectedDayTasks: [HouseholdTask] {
         let calendar = Calendar.current
 
-        return viewModel.tasks.filter {
+        return taskViewModel.tasks.filter {
             calendar.isDate($0.dueDate, inSameDayAs: selectedDate)
         }
     }
@@ -254,7 +254,7 @@ struct TodoView: View {
                 case .myTasks:
                     if let householdId = authViewModel.currentUser?.householdId {
                         MyTasksView(
-                            viewModel: viewModel,
+                            viewModel: taskViewModel,
                             householdID: householdId
                         )
                     } else {
@@ -264,7 +264,7 @@ struct TodoView: View {
                 case .householdTasks:
                     if let householdId = authViewModel.currentUser?.householdId {
                         HouseholdTasksView(
-                            viewModel: viewModel,
+                            viewModel: taskViewModel,
                             householdId: householdId
                         )
                     } else {
@@ -281,8 +281,8 @@ struct TodoView: View {
 
                 if let householdId = authViewModel.currentUser?.householdId,
                    let currentUserId = authViewModel.currentUser?.id {
-                    await viewModel.fetchTasks(householdID: householdId)
-                    await viewModel.fetchMembers(householdID: householdId)
+                    await taskViewModel.fetchTasks(householdID: householdId)
+                    await taskViewModel.fetchMembers(householdID: householdId)
 
                     chatNotificationViewModel.startListening(
                         householdId: householdId,
@@ -316,13 +316,12 @@ struct TodoView: View {
             if let user = authViewModel.currentUser,
                let householdId = user.householdId {
                 AddTodoView(
-                    viewModel: viewModel,
                     householdID: householdId,
                     createdByUserID: user.id!,
                     onTaskCreated: {
                         showSuccess = true
                     }
-                )
+                ).environment(taskViewModel)
             } else {
                 Text("No user / household available")
             }
