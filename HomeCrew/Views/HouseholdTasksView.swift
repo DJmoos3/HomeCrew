@@ -13,7 +13,7 @@ struct HouseholdTasksView: View {
     
     var body: some View {
         VStack(alignment: .leading) {
-            Text("Today's Tasks")
+            Text("Household Tasks")
                 .font(.headline)
             
             if viewModel.isLoading {
@@ -21,24 +21,32 @@ struct HouseholdTasksView: View {
             }
             ScrollView {
                 LazyVStack(spacing: 12) {
-                    ForEach(viewModel.tasks) { task in
+                    ForEach(viewModel.tasks.sorted{
+    
+                        return $0.dueDate > $1.dueDate
+                    }
+                    ) { task in
                         HStack {
-                            Image(systemName: task.completed ?  "checkmark.circle.fill" : "circle")
+                            Image(systemName: viewModel.isTaskActive(task) ?  "circle": "checkmark.circle.fill")
                                 .font(.system(size: 34))
                                 .foregroundStyle(.black.opacity(0.4))
                             
                             VStack(alignment: .leading) {
                                 Text(task.title)
                                 HStack {
-                                    Image(systemName: "clock")
-                                    Text(task.dueDate.formatted(date: .abbreviated, time: .shortened))
+                                    Text(task.recurrence.displayName)
+                                    if task.recurrence != .once {
+                                        Image(systemName: "repeat")
+                        
+                                    }
                                 }
+                                 
                                 .font(.caption)
                             }
 
                             Spacer()
 
-                            Image(systemName: "fork.knife")
+                            Image(systemName: "square.stack.3d.up")
                                 .padding()
                                 .frame(width: 40, height: 40)
                                 .background(
