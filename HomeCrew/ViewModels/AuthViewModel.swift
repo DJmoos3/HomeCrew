@@ -21,9 +21,12 @@ final class AuthViewModel {
     var isSignedIn: Bool = false
 
     private let userRepository: UserRepository
+    private let householdRepository: HouseholdRepository
+    
 
     init() {
         self.userRepository = UserRepository()
+        self.householdRepository = HouseholdRepository()
     }
 
     func checkExistingSession() {
@@ -141,6 +144,36 @@ final class AuthViewModel {
         } catch {
             errorMessage = error.localizedDescription
             print("Error updating username: \(error)")
+        }
+    }
+    
+    // delete user account 
+    func deleteAccount() async {
+        errorMessage = nil
+
+        guard let uid = Auth.auth().currentUser?.uid else {
+            errorMessage = "Could not find logged in user"
+            return
+        }
+
+        let householdId = currentUser?.householdId
+
+        do {
+            if let householdId {
+                try await householdRepository.removeMember(
+                    householdId: householdId,
+                    userId: uid
+                )
+            }
+
+            try await userRepository.deleteUser(uid: uid)
+            try await AuthRepository.shared.deleteCurrentUser()
+
+            isSignedIn = false
+            currentUser = nil
+            clearFields()
+        } catch {
+            errorMessage = error.localizedDescription
         }
     }
 }
