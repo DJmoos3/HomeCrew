@@ -167,9 +167,10 @@ struct TodoView: View {
                         .padding(4)
                         .frame(maxWidth: .infinity)
                         .background(RoundedRectangle(cornerRadius: 12)
-                                    
-                            .foregroundStyle(Calendar.current.isDateInToday(currentWeek[index]) ? HomeCrewTheme.primaryPurple : HomeCrewTheme.cardBackground)) // .foregroundStyle(Calendar.current.isDateInToday(currentWeek[index]) ? .white : HomeCrewTheme.textPrimary)
-                            .foregroundStyle(Calendar.current.isDate(currentWeek[index], inSameDayAs: selectedDate) ? HomeCrewTheme.primaryPurple : HomeCrewTheme.cardBackground)
+                            .fill(Calendar.current.isDateInToday(currentWeek[index])
+                                
+                            ? HomeCrewTheme.primaryPurple : HomeCrewTheme.cardBackground))
+                            .foregroundStyle(Calendar.current.isDate(currentWeek[index], inSameDayAs: selectedDate) ? HomeCrewTheme.mintGreen : HomeCrewTheme.textPrimary)
                        
                         .shadow(
                             color: Calendar.current.isDateInToday(currentWeek[index]) ? HomeCrewTheme.primaryPurple.opacity(0.25) : .clear, radius: 6, x: 0, y: 4
@@ -192,7 +193,7 @@ struct TodoView: View {
                     }else {
                         ForEach(selectedDayTasks) { task in
                             HStack {
-                                Image(systemName: task.lastCompleted != nil ? "checkmark.circle.fill": "ci")
+                                Image(systemName: task.lastCompleted != nil ? "checkmark.circle.fill": "circle")
                                 
                                 Text(task.title)
                                 
