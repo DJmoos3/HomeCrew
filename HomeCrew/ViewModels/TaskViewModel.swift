@@ -99,7 +99,6 @@ final class TaskViewModel {
 
         do {
             let user = try authRepository.getUser()
-            print("got user", user.uid)
 
             try await repository.createTask(
                 title: title,
@@ -172,14 +171,6 @@ final class TaskViewModel {
                 dueDate: newDate,
                 lastCompleted: now
             )
-
-            //            try await repository.db
-            //                .collection("tasks")
-            //                .document(id)
-            //                .updateData([
-            //                    "dueDate": newDate,
-            //                    "lastCompleted": now
-            //                ])
 
             if let index = tasks.firstIndex(where: { $0.id == id }) {
                 tasks[index].dueDate = newDate

@@ -24,11 +24,6 @@ final class HouseholdViewModel {
     private let repository = HouseholdRepository()
     private let authRepository: AuthRepository = .shared
 
-//    init() {
-//        self.repository = HouseholdRepository()
-//        self.authRepository = .shared
-//    }
-
     func createHousehold(name: String) async {
         errorMessage = nil
         didCreateHousehold = false
@@ -40,7 +35,6 @@ final class HouseholdViewModel {
             return
         }
 
-        //        Task {
         isLoading = true
         defer { isLoading = false }
 
@@ -55,7 +49,6 @@ final class HouseholdViewModel {
         } catch {
             errorMessage = error.localizedDescription
         }
-        //        }
     }
 
     func fetchHouseholdMembers(householdId: String) async {

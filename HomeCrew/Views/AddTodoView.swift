@@ -205,7 +205,6 @@ struct AddTodoView: View {
                         }
 
             Button {
-                print("Button works")
                 // Add task action
                 Task {
                     await viewModel.createTask(

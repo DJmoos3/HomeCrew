@@ -73,11 +73,8 @@ final class HouseholdRepository {
             createdAt: Date()
         )
 
-        print(invite)
-        print("try start")
         try db.collection("householdInvites")
             .addDocument(from: invite)
-        print("try end")
     }
 
     func acceptInvite(
