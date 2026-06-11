@@ -13,6 +13,7 @@ final class TaskRepository {
     private lazy var db = Firestore.firestore()
 
     // MARK: - CREATE TASK
+    @discardableResult
     func createTask(
         title: String,
         description: String = "",
@@ -20,7 +21,7 @@ final class TaskRepository {
         assignedToUserID: String?,
         createdByUserID: String,
         dueDate: Date
-    ) async throws {
+    ) async throws -> String {
 
         let task = HouseholdTask(
             title: title,
@@ -33,8 +34,9 @@ final class TaskRepository {
             createdAt: Date()
         )
 
-        try db.collection("tasks")
+        let docRef = try db.collection("tasks")
             .addDocument(from: task)
+        return docRef.documentID
     }
 
     // MARK: - FETCH TASKS (THIS IS THE ONE YOU WERE ASKING ABOUT)

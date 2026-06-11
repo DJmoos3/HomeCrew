@@ -85,7 +85,7 @@ final class TaskViewModel {
             print("got user", user.uid)
 
 
-            try await repository.createTask(
+            let taskID = try await repository.createTask(
                 title: title,
                 description: description,
                 householdID: householdID,
@@ -94,6 +94,12 @@ final class TaskViewModel {
                 dueDate: dueDate
             )
             print("🔥 Firestore write success")
+
+            NotificationManager.shared.scheduleTaskReminder(
+                taskID: taskID,
+                title: title,
+                dueDate: dueDate
+            )
             await fetchTasks(householdID: householdID)
 
         } catch {
@@ -114,6 +120,10 @@ final class TaskViewModel {
 
             if let index = tasks.firstIndex(where: { $0.id == id }) {
                 tasks[index].completed.toggle()
+            }
+
+            if !task.completed {
+                NotificationManager.shared.cancelTaskReminder(taskID: id)
             }
 
         } catch {
@@ -137,6 +147,7 @@ final class TaskViewModel {
 
     //Delete task
     func deleteTask(taskID: String, householdID: String) async {
+        NotificationManager.shared.cancelTaskReminder(taskID: taskID)
         do {
             try await repository.deleteTask(taskID: taskID)
             await fetchTasks(householdID: householdID)
