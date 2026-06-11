@@ -9,15 +9,14 @@ import SwiftUI
 
 struct TodoView: View {
     @Environment(AuthViewModel.self) private var authViewModel
-    @Environment(ChatNotificationViewModel.self) private
-        var chatNotificationViewModel
+    @Environment(ChatNotificationViewModel.self) private var chatNotificationViewModel
 
     @State private var showingSheet: Bool = false
-
     @State private var selectedTab: TaskTab = .myTasks
-
     @State private var viewModel: TaskViewModel = .init()
-    //    @State private var chatViewModel = ChatViewModel()
+
+    @State private var showSuccess: Bool = false
+    @State private var selectedDate: Date = Date()
 
     enum TaskTab {
         case myTasks
@@ -28,23 +27,49 @@ struct TodoView: View {
 
     private var tasksLeftCount: Int {
         guard let currentUserId = viewModel.currentUserId else { return 0 }
+
         return viewModel.tasks.filter {
-            !$0.completed && $0.assignedToUserID == currentUserId
+            viewModel.isTaskActive($0) &&
+            $0.assignedToUserID == currentUserId
         }.count
     }
 
     private var currentWeek: [Date] {
         let calendar = Calendar.current
-        let startOfWeek = calendar.dateInterval(of: .weekOfYear, for: Date())!
-            .start
+        let startOfWeek = calendar.dateInterval(of: .weekOfYear, for: Date())!.start
 
         return (0..<7).compactMap {
             calendar.date(byAdding: .day, value: $0, to: startOfWeek)
         }
     }
 
+    // Show completed/total tasks for each day
+    private func taskCount(for date: Date) -> String {
+        let calendar = Calendar.current
+
+        let tasksForDay = viewModel.tasks.filter {
+            calendar.isDate($0.dueDate, inSameDayAs: date)
+        }
+
+        let completed = tasksForDay.filter {
+            !viewModel.isTaskActive($0)
+        }.count
+
+        return "\(completed)/\(tasksForDay.count)"
+    }
+
+    // Tasks for selected day
+    private var selectedDayTasks: [HouseholdTask] {
+        let calendar = Calendar.current
+
+        return viewModel.tasks.filter {
+            calendar.isDate($0.dueDate, inSameDayAs: selectedDate)
+        }
+    }
+
     var body: some View {
         VStack {
+            // Header
             HStack {
                 VStack(alignment: .leading) {
                     Text(
@@ -57,23 +82,24 @@ struct TodoView: View {
                     )
                     .font(.callout)
                     .foregroundStyle(HomeCrewTheme.textSecondary)
+
                     HStack(alignment: .center) {
                         VStack(alignment: .leading, spacing: 4) {
-                            Text(
-                                "Hello, \(authViewModel.currentUser?.username ?? "User")"
-                            )
-                            .font(.largeTitle.bold())
-                            .foregroundStyle(HomeCrewTheme.textPrimary)
-                            Text(
-                                "You have **\(tasksLeftCount) \(tasksLeftCount == 1 ? "task":"tasks")**  left."
-                            )
-                            .font(.subheadline)
-                            .foregroundStyle(HomeCrewTheme.textSecondary)
+                            Text("Hello, \(authViewModel.currentUser?.username ?? "User")")
+                                .font(.largeTitle.bold())
+                                .foregroundStyle(HomeCrewTheme.textPrimary)
+
+                            Text("You have **\(tasksLeftCount) \(tasksLeftCount == 1 ? "task" : "tasks")** left.")
+                                .font(.subheadline)
+                                .foregroundStyle(HomeCrewTheme.textSecondary)
                         }
+
                         Spacer()
                     }
                 }
+
                 Spacer()
+
                 HStack(spacing: 16) {
                     NavigationLink {
                         ChatListView()
@@ -120,13 +146,14 @@ struct TodoView: View {
                             RoundedRectangle(cornerRadius: 12)
                                 .foregroundStyle(
                                     selectedTab == .myTasks
-                                        ? HomeCrewTheme.darkBlue
-                                        : HomeCrewTheme.cardBackground
+                                    ? HomeCrewTheme.darkBlue
+                                    : HomeCrewTheme.cardBackground
                                 )
                         )
                         .foregroundStyle(
                             selectedTab == .myTasks
-                                ? .white : HomeCrewTheme.textPrimary
+                            ? .white
+                            : HomeCrewTheme.textPrimary
                         )
                 }
 
@@ -142,13 +169,14 @@ struct TodoView: View {
                             RoundedRectangle(cornerRadius: 12)
                                 .foregroundStyle(
                                     selectedTab == .householdTasks
-                                        ? HomeCrewTheme.darkBlue
-                                        : HomeCrewTheme.cardBackground
+                                    ? HomeCrewTheme.darkBlue
+                                    : HomeCrewTheme.cardBackground
                                 )
                         )
                         .foregroundStyle(
                             selectedTab == .householdTasks
-                                ? .white : HomeCrewTheme.textPrimary
+                            ? .white
+                            : HomeCrewTheme.textPrimary
                         )
                 }
             }
@@ -156,49 +184,75 @@ struct TodoView: View {
 
             HStack {
                 ForEach(days.indices, id: \.self) { index in
+                    let date = currentWeek[index]
+
                     VStack {
                         Text(days[index])
                             .font(.subheadline.bold())
-                        Text(currentWeek[index].formatted(.dateTime.day()))
+
+                        Text(date.formatted(.dateTime.day()))
                             .font(.title3.bold())
-                        Text("2/2")
+
+                        Text(taskCount(for: date))
                             .font(.footnote)
                     }
                     .padding(4)
                     .frame(maxWidth: .infinity)
                     .background(
                         RoundedRectangle(cornerRadius: 12)
-                            .foregroundStyle(
-                                Calendar.current.isDateInToday(
-                                    currentWeek[index]
-                                )
-                                    ? HomeCrewTheme.primaryPurple
-                                    : HomeCrewTheme.cardBackground
+                            .fill(
+                                Calendar.current.isDateInToday(date)
+                                ? HomeCrewTheme.primaryPurple
+                                : HomeCrewTheme.cardBackground
                             )
                     )
                     .foregroundStyle(
-                        Calendar.current.isDateInToday(currentWeek[index])
-                            ? .white : HomeCrewTheme.textPrimary
+                        Calendar.current.isDate(date, inSameDayAs: selectedDate)
+                        ? HomeCrewTheme.mintGreen
+                        : HomeCrewTheme.textPrimary
                     )
                     .shadow(
-                        color: Calendar.current.isDateInToday(
-                            currentWeek[index]
-                        ) ? HomeCrewTheme.primaryPurple.opacity(0.25) : .clear,
+                        color: Calendar.current.isDateInToday(date)
+                        ? HomeCrewTheme.primaryPurple.opacity(0.25)
+                        : .clear,
                         radius: 6,
                         x: 0,
                         y: 4
                     )
+                    .onTapGesture {
+                        selectedDate = date
+                    }
                 }
             }
             .padding(.bottom)
 
+            VStack(alignment: .leading, spacing: 12) {
+                Text(selectedDate.formatted(date: .abbreviated, time: .omitted))
+                    .font(.headline)
+
+                if selectedDayTasks.isEmpty {
+                    Text("No tasks for this day")
+                        .foregroundStyle(.secondary)
+                } else {
+                    ForEach(selectedDayTasks) { task in
+                        HStack {
+                            Image(systemName: task.lastCompleted != nil ? "checkmark.circle.fill" : "circle")
+
+                            Text(task.title)
+
+                            Spacer()
+                        }
+                        .padding()
+                        .background(HomeCrewTheme.cardBackground)
+                        .cornerRadius(12)
+                    }
+                }
+            }
+
             Group {
                 switch selectedTab {
-
                 case .myTasks:
-                    //MyTasksView()
-                    if let householdId = authViewModel.currentUser?.householdId
-                    {
+                    if let householdId = authViewModel.currentUser?.householdId {
                         MyTasksView(
                             viewModel: viewModel,
                             householdID: householdId
@@ -206,10 +260,9 @@ struct TodoView: View {
                     } else {
                         Text("No household selected")
                     }
+
                 case .householdTasks:
-                    //HouseholdTasksView()
-                    if let householdId = authViewModel.currentUser?.householdId
-                    {
+                    if let householdId = authViewModel.currentUser?.householdId {
                         HouseholdTasksView(
                             viewModel: viewModel,
                             householdId: householdId
@@ -221,29 +274,25 @@ struct TodoView: View {
             }
 
             Spacer()
-        }  //Main VStack end
+        }
         .onAppear {
             Task {
                 await authViewModel.fetchCurrentUser()
+
                 if let householdId = authViewModel.currentUser?.householdId,
-                    let currentUserId = authViewModel.currentUser?.id
-                {
+                   let currentUserId = authViewModel.currentUser?.id {
                     await viewModel.fetchTasks(householdID: householdId)
                     await viewModel.fetchMembers(householdID: householdId)
+
                     chatNotificationViewModel.startListening(
                         householdId: householdId,
                         currentUserId: currentUserId
                     )
                 }
-
-                //                    await authViewModel.fetchCurrentUser()
-                //                    if let id = authViewModel.currentUser?.householdId {
-                //                        await viewModel.fetchTasks(householdID: id)
-                //                        await viewModel.fetchMembers(householdID: id)
-                //                    }
             }
         }
         .padding()
+        .background(HomeCrewTheme.background)
         .overlay(alignment: .bottomTrailing) {
             Button {
                 showingSheet = true
@@ -262,26 +311,31 @@ struct TodoView: View {
                     )
             }
             .padding()
-            .sheet(isPresented: $showingSheet) {
-                if let user = authViewModel.currentUser,
-                    let householdId = user.householdId
-                {
-
-                    AddTodoView(
-                        viewModel: viewModel,
-                        householdID: householdId,
-                        createdByUserID: user.id!
-                    )
-
-                } else {
-                    Text("No user / household available")
-                }
+        }
+        .sheet(isPresented: $showingSheet) {
+            if let user = authViewModel.currentUser,
+               let householdId = user.householdId {
+                AddTodoView(
+                    viewModel: viewModel,
+                    householdID: householdId,
+                    createdByUserID: user.id!,
+                    onTaskCreated: {
+                        showSuccess = true
+                    }
+                )
+            } else {
+                Text("No user / household available")
             }
         }
-        .background(HomeCrewTheme.background)
+        .alert("Task created", isPresented: $showSuccess) {
+            Button("OK") { }
+        } message: {
+            Text("Your task is created successfully.")
+        }
     }
 }
 
 #Preview {
     TodoView()
 }
+
