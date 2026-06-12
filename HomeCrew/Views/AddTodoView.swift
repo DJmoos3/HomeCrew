@@ -23,7 +23,7 @@ struct AddTodoView: View {
     @State private var selectedRepeat = "Once"
     @State private var selectedMemberID: String? = nil
 
-    private let days = ["MON", "TUE", "WED", "THU", "FRI", "SAT", "SUN"]
+//    private let days = ["MON", "TUE", "WED", "THU", "FRI", "SAT", "SUN"]
     private let repeatChoice = [
         "Once", "Daily", "Weekly", "Every Other Week", "Monthly",
     ]
@@ -31,11 +31,12 @@ struct AddTodoView: View {
     
     private var currentWeek: [Date] {
         let calendar = Calendar.current
-        let startOfWeek = calendar.dateInterval(of: .weekOfYear, for: Date())!
-            .start
-
+        let today = calendar.startOfDay(for: Date())
+        
+//        let startOfWeek = calendar.dateInterval(of: .weekOfYear, for: Date())!
+//            .start
         return (0..<7).compactMap {
-            calendar.date(byAdding: .day, value: $0, to: startOfWeek)
+            calendar.date(byAdding: .day, value: $0, to: today)
         }
     }
 
@@ -56,9 +57,13 @@ struct AddTodoView: View {
                     .foregroundStyle(HomeCrewTheme.textPrimary)
 
                 HStack {
-                    ForEach(days.indices, id: \.self) { index in
+                    ForEach(currentWeek.indices, id: \.self) { index in
                         VStack {
-                            Text(days[index])
+                            Text(
+                                currentWeek[index].formatted(
+                                    .dateTime.weekday(.abbreviated))
+                                .uppercased()
+                            )
                                 .font(.subheadline.bold())
 
                             Text(currentWeek[index].formatted(.dateTime.day()))
