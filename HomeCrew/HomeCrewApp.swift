@@ -49,6 +49,9 @@ struct HomeCrewApp: App {
             .preferredColorScheme(darkMode ? .dark : .light)
             .onAppear {
                 authViewModel.checkExistingSession()
+                Task {
+                    await NotificationManager.shared.requestPermission()
+                }
             }
         }
     }

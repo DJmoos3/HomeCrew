@@ -94,7 +94,7 @@ final class TaskViewModel {
         do {
             let user = try authRepository.getUser()
 
-            try await repository.createTask(
+            let taskID = try await repository.createTask(
                 title: title,
                 description: description,
                 householdID: householdID,
@@ -102,6 +102,13 @@ final class TaskViewModel {
                 createdByUserID: user.uid,
                 dueDate: dueDate,
                 recurrence: recurrence
+            )
+            print("🔥 Firestore write success")
+
+            NotificationManager.shared.scheduleTaskReminder(
+                taskID: taskID,
+                title: title,
+                dueDate: dueDate
             )
             await fetchTasks(householdID: householdID)
 
@@ -172,6 +179,15 @@ final class TaskViewModel {
                 tasks[index].lastCompleted = now
             }
 
+            NotificationManager.shared.cancelTaskReminder(taskID: id)
+            if task.recurrence != .once {
+                NotificationManager.shared.scheduleTaskReminder(
+                    taskID: id,
+                    title: task.title,
+                    dueDate: newDate
+                )
+            }
+
         } catch {
             errorMessage = error.localizedDescription
         }
@@ -222,6 +238,7 @@ final class TaskViewModel {
 
     //Delete task
     func deleteTask(taskID: String, householdID: String) async {
+        NotificationManager.shared.cancelTaskReminder(taskID: taskID)
         do {
             try await repository.deleteTask(householdID: householdID, taskID: taskID)
             await fetchTasks(householdID: householdID)

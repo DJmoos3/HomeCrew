@@ -13,6 +13,7 @@ final class TaskRepository {
     private lazy var db = Firestore.firestore()
 
     //CREATE TASK
+    @discardableResult
     func createTask(
         title: String,
         description: String = "",
@@ -21,7 +22,7 @@ final class TaskRepository {
         createdByUserID: String,
         dueDate: Date,
         recurrence: TaskRecurrence = .once
-    ) async throws {
+    ) async throws -> String {
 
         let task = HouseholdTask(
             title: title,
@@ -34,11 +35,12 @@ final class TaskRepository {
             recurrence: recurrence
         )
 
-        try db
+        let docRef = try db
             .collection("households")
             .document(householdID)
             .collection("tasks")
             .addDocument(from: task)
+        return docRef.documentID
     }
 
     //FETCH TASKS
