@@ -14,11 +14,14 @@ final class HouseholdRepository {
     func createHousehold(name: String, authUser: AuthDataResultModel)
         async throws
     {
-        try await db.collection("households").addDocument(data: [
+        let ref = try await db.collection("households").addDocument(data: [
             "name": name,
             "memberIds": [authUser.uid],
             "createdBy": authUser.uid,
             "createdAt": FieldValue.serverTimestamp()
+        ])
+        try await db.collection("users").document(authUser.uid).updateData([
+            "householdId": ref.documentID
         ])
     }
 
