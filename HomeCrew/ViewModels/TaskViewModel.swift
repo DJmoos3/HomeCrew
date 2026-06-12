@@ -47,12 +47,6 @@ final class TaskViewModel {
     private let authRepository: AuthRepository = .shared
     private let householdRepository = HouseholdRepository()
 
-//    init() {
-//        self.repository = TaskRepository()
-//        self.authRepository = .shared
-//        self.householdRepository = HouseholdRepository()
-//    }
-
     var currentUserId: String? {
         try? authRepository.getUser().uid
     }
@@ -167,6 +161,7 @@ final class TaskViewModel {
             )
 
             try await repository.completeTask(
+                householdID: task.householdID,
                 taskID: id,
                 dueDate: newDate,
                 lastCompleted: now
@@ -213,6 +208,7 @@ final class TaskViewModel {
     ) async {
         do {
             try await repository.assignTask(
+                householdID: householdID,
                 taskID: taskID,
                 assignedToUserID: assignedToUserID
             )
@@ -227,7 +223,7 @@ final class TaskViewModel {
     //Delete task
     func deleteTask(taskID: String, householdID: String) async {
         do {
-            try await repository.deleteTask(taskID: taskID)
+            try await repository.deleteTask(householdID: householdID, taskID: taskID)
             await fetchTasks(householdID: householdID)
         } catch {
             errorMessage = error.localizedDescription
