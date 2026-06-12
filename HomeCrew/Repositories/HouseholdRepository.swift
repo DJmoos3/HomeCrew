@@ -14,15 +14,11 @@ final class HouseholdRepository {
     func createHousehold(name: String, authUser: AuthDataResultModel)
         async throws
     {
-        let household = Household(
-            name: name,
-            memberIds: [authUser.uid],
-            createdBy: authUser.uid,
-            createdAt: Date()
-        )
-        let ref = try db.collection("households").addDocument(from: household)
-        try await db.collection("users").document(authUser.uid).updateData([
-            "householdId": ref.documentID
+        try await db.collection("households").addDocument(data: [
+            "name": name,
+            "memberIds": [authUser.uid],
+            "createdBy": authUser.uid,
+            "createdAt": FieldValue.serverTimestamp()
         ])
     }
 
@@ -32,7 +28,6 @@ final class HouseholdRepository {
     }
 
     //Update Household name in Firestore (omar)
-    
     func updateHouseholdName(householdId: String, name: String) async throws {
         try await db.collection("households")
             .document(householdId)
@@ -65,16 +60,13 @@ final class HouseholdRepository {
         invitedEmail: String,
         invitedByUserId: String
     ) async throws {
-        let invite = HouseholdInvite(
-            householdId: householdId,
-            invitedEmail: invitedEmail.lowercased(),
-            invitedByUserId: invitedByUserId,
-            status: .pending,
-            createdAt: Date()
-        )
-
-        try db.collection("householdInvites")
-            .addDocument(from: invite)
+        try await db.collection("householdInvites").addDocument(data: [
+            "householdId": householdId,
+            "invitedEmail": invitedEmail.lowercased(),
+            "invitedByUserId": invitedByUserId,
+            "status": InviteStatus.pending.rawValue,
+            "createdAt": FieldValue.serverTimestamp()
+        ])
     }
 
     func acceptInvite(

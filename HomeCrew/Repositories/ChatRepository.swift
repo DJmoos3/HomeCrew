@@ -65,22 +65,16 @@ final class ChatRepository {
             return existingChat.documentID
         }
 
-        let chat = Chat(
-            type: .group,
-            title: "Household Chat",
-            memberIds: memberIds,
-            createdAt: Date(),
-            lastMessage: nil,
-            lastMessageAt: nil,
-            lastMessageSenderId: nil,
-            lastReadAtByUser: nil
-        )
-
-        let ref = try db
+        let ref = try await db
             .collection("households")
             .document(householdId)
             .collection("chats")
-            .addDocument(from: chat)
+            .addDocument(data: [
+                "type": ChatType.group.rawValue,
+                "title": "Household Chat",
+                "memberIds": memberIds,
+                "createdAt": FieldValue.serverTimestamp()
+            ])
 
         return ref.documentID
     }
@@ -111,7 +105,7 @@ final class ChatRepository {
             "title": otherUserName,
             "memberIds": sortedIds,
             "directKey": directKey,
-            "createdAt": Date()
+            "createdAt": FieldValue.serverTimestamp()
         ]
 
         let ref = try await db
@@ -129,11 +123,6 @@ final class ChatRepository {
         senderId: String,
         text: String
     ) async throws {
-        let message = Message(
-            text: text,
-            senderId: senderId,
-            createdAt: Date()
-        )
 
         let chatRef = db
             .collection("households")
@@ -141,15 +130,19 @@ final class ChatRepository {
             .collection("chats")
             .document(chatId)
 
-        try chatRef
+        try await chatRef
             .collection("messages")
-            .addDocument(from: message)
+            .addDocument(data: [
+            "text": text,
+            "senderId": senderId,
+            "createdAt": FieldValue.serverTimestamp()
+        ])
 
         try await chatRef.updateData([
             "lastMessage": text,
-            "lastMessageAt": Date(),
+            "lastMessageAt": FieldValue.serverTimestamp(),
             "lastMessageSenderId": senderId,
-            "lastReadAtByUser.\(senderId)": Date()
+            "lastReadAtByUser.\(senderId)": FieldValue.serverTimestamp()
         ])
     }
 
@@ -212,7 +205,7 @@ final class ChatRepository {
             .collection("chats")
             .document(chatId)
             .updateData([
-                "lastReadAtByUser.\(userId)": Date()
+                "lastReadAtByUser.\(userId)": FieldValue.serverTimestamp()
             ])
     }
 }
