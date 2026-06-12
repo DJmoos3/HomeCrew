@@ -10,7 +10,7 @@ import SwiftUI
 struct LoginView: View {
 
     @Environment(AuthViewModel.self) private var viewModel
-
+    @AppStorage("darkModeEnabled") private var darkMode = false
     private enum Field {
         case email
         case password
@@ -30,7 +30,7 @@ struct LoginView: View {
 
                     // Logo
                     VStack(spacing: 8) {
-                        Image("HomeCrewLogo")
+                        Image(darkMode ? "HomeCrewLogoDark" : "HomeCrewLogo")
                             .resizable()
                             .scaledToFit()
                             .frame(
