@@ -20,14 +20,8 @@ final class AuthViewModel {
     var errorMessage: String? = nil
     var isSignedIn: Bool = false
 
-    private let userRepository: UserRepository
-    private let householdRepository: HouseholdRepository
-    
-
-    init() {
-        self.userRepository = UserRepository()
-        self.householdRepository = HouseholdRepository()
-    }
+    private let userRepository = UserRepository()
+    private let householdRepository = HouseholdRepository()
 
     func checkExistingSession() {
         let hasLaunchedBefore = UserDefaults.standard.bool(forKey: "hasLaunchedBefore")
@@ -66,7 +60,6 @@ final class AuthViewModel {
             isSignedIn = true
             password = ""
             await fetchCurrentUser()
-            print("Success")
         } catch {
             isSignedIn = false
             password = ""

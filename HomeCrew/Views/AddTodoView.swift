@@ -9,7 +9,7 @@ import SwiftUI
 
 struct AddTodoView: View {
     
-    @Bindable var viewModel = TaskViewModel()
+    @Environment(TaskViewModel.self) private var taskViewModel
         let householdID: String
         let createdByUserID: String
     @Environment(\.dismiss) private var dismiss
@@ -193,7 +193,7 @@ struct AddTodoView: View {
                                 Text("Unassigned")
                                     .tag(Optional<String>.none)
 
-                                ForEach(viewModel.members) { member in
+                                ForEach(taskViewModel.members) { member in
                                     Text(member.name)
                                         .tag(Optional(member.id))
                                 }
@@ -205,10 +205,9 @@ struct AddTodoView: View {
                         }
 
             Button {
-                print("Button works")
                 // Add task action
                 Task {
-                    await viewModel.createTask(
+                    await taskViewModel.createTask(
                         title: taskTitle,
                         description: "",
                         householdID: householdID,
@@ -218,7 +217,7 @@ struct AddTodoView: View {
                     
                     )
                     
-                    await viewModel.fetchTasks(householdID: householdID)
+                    await taskViewModel.fetchTasks(householdID: householdID)
         
                     onTaskCreated?()
                     dismiss()

@@ -36,7 +36,7 @@ struct HomeCrewApp: App {
             Group {
                 if authViewModel.isSignedIn {
                     NavigationStack {
-                        ContentView()
+                        TodoView()
                     }
                 } else {
                     NavigationStack {
