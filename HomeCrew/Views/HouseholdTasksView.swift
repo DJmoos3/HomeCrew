@@ -31,6 +31,20 @@ struct HouseholdTasksView: View {
                                 .font(.system(size: 34))
                                 .foregroundStyle(.black.opacity(0.4))
                             
+                            //Assigned user Avatar
+                            if let userId = task.assignedToUserID {
+                                   Circle()
+                                       .fill(avatarColor(for: userId))
+                                       .frame(width: 28, height: 28)
+                                       .overlay {
+                                           Text(initials(for: userId))
+                                               .font(.caption2)
+                                               .fontWeight(.bold)
+                                               .foregroundStyle(.white)
+                                       }
+                               }
+                          
+                            
                             VStack(alignment: .leading) {
                                 Text(task.title)
                                 HStack {
@@ -74,6 +88,26 @@ struct HouseholdTasksView: View {
         .task {
             await viewModel.fetchTasks(householdID: householdId)
         }
+    }
+    //Adding function for avatar for each member
+    private func member(for userId: String)-> Member? {
+        viewModel.members.first{ $0.id == userId }
+    }
+    //Function for initial letter
+    private func initials(for userId: String) -> String {
+        let name = member(for: userId)?.name ?? "?"
+        let parts = name.split(separator: " ")
+        
+        let initials = parts.prefix(2)
+            .compactMap{ $0.first }
+            .map{ String($0).uppercased() }
+            .joined()
+        return initials.isEmpty ? "?" : initials
+    }
+    private func avatarColor(for userId: String)-> Color {
+        let colors: [Color] = [.purple, .blue, .green, .orange, .pink, .teal, .indigo]
+        return colors[abs(userId.hashValue) % colors.count]
+        
     }
 }
 

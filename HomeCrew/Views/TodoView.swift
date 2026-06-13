@@ -23,7 +23,7 @@ struct TodoView: View {
         case householdTasks
     }
 
-    private let days = ["MON", "TUE", "WED", "THU", "FRI", "SAT", "SUN"]
+//    private let days = ["MON", "TUE", "WED", "THU", "FRI", "SAT", "SUN"]
 
     private var tasksLeftCount: Int {
         guard let currentUserId = taskViewModel.currentUserId else { return 0 }
@@ -36,10 +36,10 @@ struct TodoView: View {
 
     private var currentWeek: [Date] {
         let calendar = Calendar.current
-        let startOfWeek = calendar.dateInterval(of: .weekOfYear, for: Date())!.start
+        let today = calendar.startOfDay(for: Date())
 
         return (0..<7).compactMap {
-            calendar.date(byAdding: .day, value: $0, to: startOfWeek)
+            calendar.date(byAdding: .day, value: $0, to: today)
         }
     }
 
@@ -183,14 +183,17 @@ struct TodoView: View {
             .padding(.bottom)
 
             HStack {
-                ForEach(days.indices, id: \.self) { index in
+                ForEach(currentWeek.indices, id: \.self) { index in
                     let date = currentWeek[index]
-
                     VStack {
-                        Text(days[index])
+                        Text(currentWeek[index]
+                            .formatted(.dateTime.weekday(.abbreviated))
+                            .uppercased()
+                             )
                             .font(.subheadline.bold())
 
-                        Text(date.formatted(.dateTime.day()))
+
+                        Text(currentWeek[index].formatted(.dateTime.day()))
                             .font(.title3.bold())
 
                         Text(taskCount(for: date))
