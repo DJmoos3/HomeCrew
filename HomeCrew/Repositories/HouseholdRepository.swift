@@ -96,21 +96,35 @@ final class HouseholdRepository {
             ])
     }
 
+    
     func removeMember(
         householdId: String,
         userId: String
     ) async throws {
-        try await db.collection("households")
+        let householdRef = db.collection("households")
             .document(householdId)
-            .updateData([
-                "memberIds": FieldValue.arrayRemove([userId])
-            ])
 
+        // Remove the user from the household member list
+        try await householdRef.updateData([
+            "memberIds": FieldValue.arrayRemove([userId])
+        ])
+
+        // Remove the household connection from the user document
         try await db.collection("users")
             .document(userId)
             .updateData([
                 "householdId": FieldValue.delete()
             ])
+
+        // Fetch the updated household to check if any members are left
+        let snapshot = try await householdRef.getDocument()
+        let data = snapshot.data()
+        let memberIds = data?["memberIds"] as? [String] ?? []
+
+        // Delete the household if it has no members left
+        if memberIds.isEmpty {
+            try await householdRef.delete()
+        }
     }
     
     func addMemberDirectly(

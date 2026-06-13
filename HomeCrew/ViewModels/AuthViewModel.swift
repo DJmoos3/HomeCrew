@@ -175,4 +175,31 @@ final class AuthViewModel {
             print("Error deleting account: \(error)")
         }
     }
+    
+    // Leave household without deleting the user account
+    func leaveHousehold() async {
+        errorMessage = nil
+
+        guard let uid = currentUser?.id else {
+            errorMessage = "Could not find current user"
+            return
+        }
+
+        guard let householdId = currentUser?.householdId else {
+            errorMessage = "No household to leave"
+            return
+        }
+
+        do {
+            try await householdRepository.removeMember(
+                householdId: householdId,
+                userId: uid
+            )
+
+            currentUser?.householdId = nil
+        } catch {
+            errorMessage = error.localizedDescription
+            print("Error leaving household: \(error)")
+        }
+    }
 }

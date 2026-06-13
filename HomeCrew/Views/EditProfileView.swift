@@ -17,7 +17,6 @@ struct EditProfileView: View {
 
     // Local settings saved on the device
     @AppStorage("darkModeEnabled") private var darkMode = false
-    @AppStorage("taskReminderEnabled") private var taskReminder = true
 
     // Username edit
     @State private var editedFullName = ""
@@ -30,6 +29,7 @@ struct EditProfileView: View {
     // Alerts
     @State private var showSaveAlert = false
     @State private var showDeleteAccountAlert = false
+    @State private var showLeaveHouseholdAlert = false
 
     // Current username
     private var displayName: String {
@@ -69,9 +69,13 @@ struct EditProfileView: View {
 
         return colors[value % colors.count]
     }
-    
+
     // Current household name
     private var displayHouseholdName: String {
+        if authViewModel.currentUser?.householdId == nil {
+            return "No household set"
+        }
+
         if householdViewModel.householdName.isEmpty {
             return "No household set"
         }
@@ -112,18 +116,27 @@ struct EditProfileView: View {
                         iconColor: HomeCrewTheme.darkBlue,
                         title: "Household Name",
                         subtitle: displayHouseholdName,
-                        showEditIcon: true
+                        showEditIcon: authViewModel.currentUser?.householdId != nil
                     )
                 }
                 .buttonStyle(.plain)
+                .disabled(authViewModel.currentUser?.householdId == nil)
+                .opacity(authViewModel.currentUser?.householdId == nil ? 0.5 : 1)
 
-                profileRow(
-                    icon: "rectangle.portrait.and.arrow.right",
-                    iconColor: HomeCrewTheme.primaryPurple,
-                    title: "Leave Household",
-                    subtitle: nil,
-                    showEditIcon: true
-                )
+                Button {
+                    showLeaveHouseholdAlert = true
+                } label: {
+                    profileRow(
+                        icon: "rectangle.portrait.and.arrow.right",
+                        iconColor: HomeCrewTheme.primaryPurple,
+                        title: "Leave Household",
+                        subtitle: authViewModel.currentUser?.householdId == nil ? "No household to leave" : nil,
+                        showEditIcon: authViewModel.currentUser?.householdId != nil
+                    )
+                }
+                .buttonStyle(.plain)
+                .disabled(authViewModel.currentUser?.householdId == nil)
+                .opacity(authViewModel.currentUser?.householdId == nil ? 0.5 : 1)
 
                 Button {
                     showDeleteAccountAlert = true
@@ -139,24 +152,6 @@ struct EditProfileView: View {
                 .buttonStyle(.plain)
 
                 sectionTitle("Preferences")
-
-                VStack(alignment: .leading, spacing: 8) {
-                    toggleRow(
-                        icon: "bell.fill",
-                        iconColor: HomeCrewTheme.darkBlue,
-                        title: "Task Reminder",
-                        isOn: $taskReminder
-                    )
-
-                    Text(
-                        taskReminder
-                        ? "Reminders are enabled for your assigned tasks."
-                        : "Reminders are disabled."
-                    )
-                    .font(.caption)
-                    .foregroundStyle(HomeCrewTheme.textSecondary)
-                    .padding(.horizontal, 4)
-                }
 
                 toggleRow(
                     icon: "moon.fill",
@@ -195,6 +190,19 @@ struct EditProfileView: View {
             }
         } message: {
             Text("Are you sure you want to delete your account?")
+        }
+        .alert("Leave household?", isPresented: $showLeaveHouseholdAlert) {
+            Button("Cancel", role: .cancel) { }
+
+            Button("Leave", role: .destructive) {
+                Task {
+                    await authViewModel.leaveHousehold()
+                    householdViewModel.householdName = ""
+                    editedHouseholdName = "No household set"
+                }
+            }
+        } message: {
+            Text("Are you sure you want to leave this household?")
         }
     }
 
@@ -289,6 +297,8 @@ struct EditProfileView: View {
     // Load household name when the page opens
     private func loadHouseholdName() {
         guard let householdId = authViewModel.currentUser?.householdId else {
+            householdViewModel.householdName = ""
+            editedHouseholdName = "No household set"
             return
         }
 
