@@ -39,6 +39,7 @@ final class AuthViewModel {
 
     func clearFields() {
         email = ""
+        username = ""
         password = ""
         errorMessage = nil
     }
